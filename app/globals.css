@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --surface-0: #ffffff;
+  --surface-1: #f7f7f8;
+  --surface-2: #fbfbfc;
+  --border: #e5e5e7;
+  --border-strong: #c7c7cc;
+  --border-success: #b7ddc0;
+  --border-warning: #f0d9a8;
+  --border-danger: #f0b8b8;
+  --border-accent: #a9c4f5;
+  --text-primary: #1c1c1e;
+  --text-secondary: #48484a;
+  --text-muted: #86868b;
+  --text-success: #1e7a3d;
+  --text-warning: #92650c;
+  --text-danger: #b3261e;
+  --text-accent: #2258c9;
+  --bg-success: #eaf7ee;
+  --bg-warning: #fdf4e1;
+  --bg-danger: #fbeaea;
+  --bg-pro: #eef1fd;
+  --border-pro: #c7d1f7;
+  --text-pro: #3a4ab0;
+  --radius: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface-0: #0f0f11;
+    --surface-1: #17171a;
+    --surface-2: #1c1c1f;
+    --border: #2c2c2f;
+    --border-strong: #3d3d41;
+    --text-primary: #f2f2f3;
+    --text-secondary: #c7c7cc;
+    --text-muted: #8e8e93;
+  }
+}
+
+body {
+  color: var(--text-primary);
+  background: var(--surface-0);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+.pill {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 0.5px solid var(--border);
+  color: var(--text-secondary);
+  background: var(--surface-1);
+  white-space: nowrap;
+}
+.pill-ok {
+  border-color: var(--border-success);
+  color: var(--text-success);
+  background: var(--bg-success);
+}
+.pill-warn {
+  border-color: var(--border-warning);
+  color: var(--text-warning);
+  background: var(--bg-warning);
+}
+.pill-block {
+  border-color: var(--border-danger);
+  color: var(--text-danger);
+  background: var(--bg-danger);
+}
+
+.btn {
+  font-size: 13px;
+  padding: 7px 14px;
+  border-radius: var(--radius);
+  border: 0.5px solid var(--border-strong);
+  background: var(--surface-0);
+  color: var(--text-primary);
+}
+.btn:hover {
+  border-color: var(--text-accent);
+}
+.btn-primary {
+  background: var(--text-primary);
+  color: var(--surface-0);
+  border-color: var(--text-primary);
+}
+.card {
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-0);
+}
