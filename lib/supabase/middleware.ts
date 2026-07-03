@@ -39,7 +39,14 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(redirectUrl);
     }
 
-    const { data: profile } = await supabase
+
+    const { createClient: createBaseClient } = require("@supabase/supabase-js");
+    const adminClient = createBaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+    const { data: profile } = await adminClient
       .from("users")
       .select("role")
       .eq("id", user.id)

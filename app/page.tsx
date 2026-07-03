@@ -13,13 +13,9 @@ export default function HomePage() {
             Admin / site manager sign in
           </Link>
           <Link href="/site/downtown-core" className="btn justify-center flex">
-            Worker demo QR sign-in (downtown-core)
+            Employee demo QR sign-in 
           </Link>
         </div>
-        <p className="text-xs text-text-muted mt-8">
-          Workers normally arrive here by scanning the project QR code on site,
-          not by visiting this page directly.
-        </p>
       </div>
     </main>
   );
