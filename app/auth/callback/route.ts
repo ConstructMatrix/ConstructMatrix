@@ -6,27 +6,28 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const redirectTo = searchParams.get("redirect") || "/onboarding";
 
+  if (!code) {
+    return NextResponse.redirect(`${origin}/login?error=link_expired`);
+  }
+
   if (code) {
     const supabase = createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (error) {
       console.log("AUTH ERROR:", error);
-      return NextResponse.redirect(`${origin}/login?error=auth_error`);
+      return NextResponse.redirect(`${origin}/login?error=link_expired`);
     }
 
     const { data: { user } } = await supabase.auth.getUser();
-    console.log("USER:", user?.id, user?.email);
 
-    if (user) {
+    if (user && redirectTo.startsWith("/admin")) {
       const admin = createServiceRoleClient();
-      const { data: profile, error: profileError } = await admin
+      const { data: profile } = await admin
         .from("users")
         .select("role")
         .eq("id", user.id)
         .single();
-
-      console.log("PROFILE:", profile, "ERROR:", profileError);
 
       if (!profile || (profile.role !== "admin" && profile.role !== "manager")) {
         return NextResponse.redirect(`${origin}/login?error=not_authorized`);

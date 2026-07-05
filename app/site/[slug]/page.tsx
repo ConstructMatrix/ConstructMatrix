@@ -1,14 +1,20 @@
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/server";
 import SiteSignInForm from "./SiteSignInForm";
 
 export default async function SiteSignInPage({ params }: { params: { slug: string } }) {
-  const supabase = createClient();
-  const { data: project } = await supabase
+  console.log("SLUG:", params.slug);
+  console.log("SUPABASE URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+  console.log("SERVICE KEY exists:", !!process.env.SUPABASE_SERVICE_ROLE_KEY);
+  
+  const supabase = createServiceRoleClient();
+  const { data: project, error } = await supabase
     .from("projects")
     .select("id, name, address, slug")
     .eq("slug", params.slug)
     .single();
+
+  console.log("PROJECT:", project, "ERROR:", error);
 
   if (!project) notFound();
 

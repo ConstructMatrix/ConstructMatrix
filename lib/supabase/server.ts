@@ -1,4 +1,5 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { createClient as createBaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 export function createClient() {
@@ -15,28 +16,22 @@ export function createClient() {
         set(name: string, value: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value, ...options });
-          } catch {
-            // called from a Server Component; middleware refreshes the session instead
-          }
+          } catch {}
         },
         remove(name: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value: "", ...options });
-          } catch {
-            // called from a Server Component; middleware refreshes the session instead
-          }
+          } catch {}
         },
       },
     },
   );
 }
 
-/** Service-role client for privileged server-only operations (cron jobs, AI scan writes). */
 export function createServiceRoleClient() {
-  const { createClient: createBaseClient } = require("@supabase/supabase-js");
   return createBaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } },
+    { auth: { autoRefreshToken: false, persistSession: false } }
   );
 }
