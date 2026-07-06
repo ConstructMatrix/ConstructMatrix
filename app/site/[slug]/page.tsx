@@ -25,7 +25,7 @@ export default async function SiteSignInPage({ params }: { params: { slug: strin
           <span className="w-1.5 h-1.5 rounded-full bg-border-strong" />
           <span className="w-1.5 h-1.5 rounded-full bg-border-strong" />
           <span className="w-1.5 h-1.5 rounded-full bg-border-strong" />
-          <span className="text-[10px] text-text-muted ml-1">constructmatrix.app</span>
+          <span className="text-[10px] text-text-muted ml-1">constructmatrix</span>
         </div>
         <div className="p-5">
           <h1 className="text-base font-medium">{project.name}</h1>

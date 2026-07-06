@@ -61,9 +61,9 @@ export default function DocumentsList({
     const isUploading = uploading === config.document_type;
 
     return (
-      <div className="flex items-center gap-2.5 px-3 py-2.5 border-b border-border last:border-b-0 text-xs">
+      <div className="flex items-center gap-3 px-4 py-4 border-b border-border last:border-b-0">
         <div
-          className={`w-7 h-7 rounded flex items-center justify-center flex-shrink-0 ${
+          className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0  ${
             status === "verified"
               ? "bg-bg-success text-text-success"
               : status === "pending"
@@ -74,8 +74,8 @@ export default function DocumentsList({
           {status === "verified" ? "✓" : status === "pending" ? "…" : "↑"}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-[13px] font-medium">{config.document_type}</div>
-          <div className="text-[11px] text-text-muted">
+          <div className="text-sm font-medium">{config.document_type}</div>
+          <div className="text-xs text-text-muted mt-0.5">
             {status === "verified" && "Verified"}
             {status === "pending" && (isUploading ? "Scanning with AI…" : "Uploaded · Waiting for review")}
             {status === "missing" && (config.is_mandatory ? "Not yet uploaded" : "Optional · Not uploaded")}
@@ -84,7 +84,23 @@ export default function DocumentsList({
         {status === "verified" ? (
           <span className="pill pill-ok">Verified</span>
         ) : status === "pending" ? (
-          <span className="pill pill-warn">Pending</span>
+          <div className="flex items-center gap-2">
+            <span className="pill pill-warn">Pending</span>
+            <button
+              className="text-xs text-text-danger"
+              onClick={async () => {
+                if (!doc) return;
+                await fetch(`/api/delete-document`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ documentId: doc.id }),
+                });
+                setDocs((prev) => prev.filter((d) => d.id !== doc.id));
+              }}
+            >
+              Remove
+            </button>
+          </div>
         ) : (
           <>
             <input
@@ -92,9 +108,7 @@ export default function DocumentsList({
               accept="image/*"
               capture="environment"
               className="hidden"
-              ref={(el) => {
-                fileInputs.current[config.document_type] = el;
-              }}
+              ref={(el) => { fileInputs.current[config.document_type] = el; }}
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) handleFile(config, file);

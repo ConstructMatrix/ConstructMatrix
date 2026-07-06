@@ -148,3 +148,17 @@ export async function removeChecklistSection(projectId: string, sectionId: strin
   await supabase.from("project_checklist_config").delete().eq("id", sectionId);
   redirect(`/admin/projects/${projectId}`);
 }
+
+export async function removeChecklistItem(projectId: string, sectionId: string, itemIndex: number ){
+  const supabase = createClient();
+
+  const { data: section } = await supabase
+    .from("project_checklist_config")
+    .select("items")
+    .eq("id", sectionId)
+    .single();
+
+  const items = [...(section?.items || [])].filter((_, i) => i !== itemIndex);
+  await supabase.from("project_checklist_config").update({ items }).eq("id", sectionId);
+  redirect(`/admin/projects/${projectId}`);
+}
