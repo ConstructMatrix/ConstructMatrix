@@ -26,7 +26,7 @@ export default async function HistoryPage({
   );
 
   return (
-    <div className="p-5 max-w-3xl">
+    <div className="p-5 mx-auto">
       <div className="mb-5">
         <h1 className="text-base font-medium">Checklist submission history</h1>
         <p className="text-xs text-text-muted mt-0.5">Full audit trail of every onboarding checklist submitted, across all projects.</p>

@@ -9,7 +9,7 @@ export default async function ProjectsPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <div className="p-5 max-w-3xl">
+    <div className="p-5 mx-auto">
       <div className="mb-5 flex items-start justify-between">
         <div>
           <h1 className="text-base font-medium">Projects</h1>
