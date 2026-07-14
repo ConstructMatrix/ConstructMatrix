@@ -52,7 +52,7 @@ export async function updateSession(request: NextRequest) {
       .eq("id", user.id)
       .single();
 
-    if (!profile || (profile.role !== "admin" && profile.role !== "manager")) {
+    if (!profile || !["admin", "manager"].includes(profile.role)) {
       const redirectUrl = request.nextUrl.clone();
       redirectUrl.pathname = "/login";
       redirectUrl.searchParams.set("error", "not_authorized");

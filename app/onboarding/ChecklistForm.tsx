@@ -20,6 +20,7 @@ export default function ChecklistForm({
   const [workerName, setWorkerName] = useState(profile.fullName);
   const [company, setCompany] = useState(profile.company);
   const [unionTrade, setUnionTrade] = useState(profile.unionTrade);
+  const [employeeType, setEmployeeType] = useState("");
   const [responses, setResponses] = useState<Record<string, ChecklistResponseValue>>({});
   const [errors, setErrors] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -55,6 +56,7 @@ export default function ChecklistForm({
       workerName,
       company,
       unionTrade,
+      employeeType,
       responses,
       signatureDataUrl,
     });
@@ -91,10 +93,25 @@ export default function ChecklistForm({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 card bg-surface-1 p-3 mb-3">
+        <div className="grid grid-cols-2 gap-2 card bg-surface-1 p-3 mb-3">
         <Field label="Worker's name" value={workerName} onChange={setWorkerName} />
         <Field label="Company" value={company} onChange={setCompany} />
         <Field label="Union / trade" value={unionTrade} onChange={setUnionTrade} />
+        <div>
+          <div className="text-[10px] text-text-muted uppercase tracking-wide mb-0.5">Worker type</div>
+          <select
+            value={employeeType}
+            onChange={(e) => setEmployeeType(e.target.value)}
+            className="text-sm bg-transparent border-b border-border w-full pb-0.5 outline-none"
+          >
+            <option value="">Select type...</option>
+            <option value="contractor">Contractor</option>
+            <option value="subcontractor">Subcontractor</option>
+            <option value="consultant">Consultant</option>
+            <option value="owner">Owner</option>
+            <option value="employee">Employee</option>
+          </select>
+        </div>
         <Field label="Date" value={new Date().toLocaleDateString()} onChange={() => {}} readOnly />
       </div>
 

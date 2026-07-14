@@ -11,6 +11,7 @@ export interface SubmitChecklistInput {
   workerName: string;
   company: string;
   unionTrade: string;
+   employeeType: string;
   responses: Record<string, ChecklistResponseValue>;
   signatureDataUrl: string;
 }
@@ -28,6 +29,12 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
   } = await supabase.auth.getUser();
 
   if (!user) return { ok: false, error: "Not signed in." };
+  if (input.employeeType) {
+  await supabase
+    .from("users")
+    .update({ employee_type: input.employeeType })
+    .eq("id", user.id);
+   }
   if (!input.signatureDataUrl) return { ok: false, error: "A signature is required before submitting." };
 
   const { data: project } = await supabase
@@ -69,6 +76,7 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
       workerName: input.workerName,
       company: input.company,
       unionTrade: input.unionTrade || null,
+      employeeType: input.employeeType || null,
       submittedAt,
       sections,
       responses: input.responses,

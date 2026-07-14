@@ -9,6 +9,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   } = await supabase.auth.getUser();
   const { data: profile } = await supabase.from("users").select("full_name, role").eq("id", user!.id).single();
 
+  const isAdmin = profile?.role === "admin";
+
   return (
     <div>
       <nav className="flex items-center border-b border-border bg-surface-1 px-4 gap-0">
@@ -24,6 +26,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <Link href="/admin/history" className="text-[13px] px-3.5 py-2.5 text-text-muted hover:text-text-primary">
           History
         </Link>
+        {isAdmin && (
+          <Link href="/admin/team" className="text-[13px] px-3.5 py-2.5 text-text-muted hover:text-text-primary">
+            Team
+          </Link>
+        )}
         <div className="ml-auto flex items-center gap-3 py-1.5">
           <span className="text-[11px] text-text-muted">
             {profile?.full_name || user?.email} · {profile?.role}

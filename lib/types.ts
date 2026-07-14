@@ -1,4 +1,6 @@
-export type UserRole = "admin" | "manager" | "employee" | "contractor" | "subcontractor";
+export type UserRole = "admin" | "manager" | "contractor";
+
+export type EmployeeType = "employee" | "owner" | "contractor" | "subcontractor" | "consultant";
 
 export type ProjectStatus = "pending" | "in_progress" | "blocked" | "cleared";
 
@@ -9,7 +11,7 @@ export interface AppUser {
   full_name: string | null;
   position: string | null;
   company: string | null;
-  employee_type: "employee" | "contractor" | "subcontractor" | null;
+  employee_type: EmployeeType | null;
   photo_url: string | null;
   created_at: string;
 }
@@ -21,6 +23,7 @@ export interface Project {
   address: string | null;
   admin_id: string;
   slug: string;
+  onboarding_type: "internal" | "external";
   created_at: string;
 }
 

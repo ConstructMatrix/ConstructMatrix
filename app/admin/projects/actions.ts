@@ -1,5 +1,4 @@
 "use server";
-
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -62,10 +61,11 @@ export async function createProject(formData: FormData) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
   const useDefaults = formData.get("useDefaults") === "on";
+  const onboarding_type = String(formData.get("onboarding_type") || "external");
 
   const { data: project, error } = await supabase
     .from("projects")
-    .insert({ name, description, address, slug, admin_id: user!.id })
+    .insert({ name, description, address, slug, admin_id: user!.id, onboarding_type})
     .select()
     .single();
 
