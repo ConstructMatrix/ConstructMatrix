@@ -1,10 +1,8 @@
 import { Resend } from "resend";
 
-const FROM = process.env.RESEND_FROM_EMAIL || "Construct Matrix <alerts@constructmatrix.app>";
+const FROM = process.env.RESEND_FROM_EMAIL ?? "Construct Matrix <noreply@atconstructmatrix.com>";
 
-// Constructed lazily (not at module load) so the app can still build without
-// RESEND_API_KEY set; it's only required at runtime when an email actually sends.
-function getResend() {
+function resend() {
   return new Resend(process.env.RESEND_API_KEY);
 }
 
@@ -22,7 +20,7 @@ export async function sendExpiryAlert(params: {
       ? `${documentType} has expired — ${projectName}`
       : `${documentType} expires in ${daysRemaining} days — ${projectName}`;
 
-  return getResend().emails.send({
+  return resend().emails.send({
     from: FROM,
     to,
     subject,
@@ -50,7 +48,7 @@ export async function sendAdminExpiryAlert(params: {
       ? `${workerName}: ${documentType} expired — ${projectName}`
       : `${workerName}: ${documentType} expires in ${daysRemaining} days — ${projectName}`;
 
-  return getResend().emails.send({
+  return resend().emails.send({
     from: FROM,
     to,
     subject,
@@ -67,7 +65,7 @@ export async function sendChecklistSubmittedNotice(params: {
   workerName: string;
   projectName: string;
 }) {
-  return getResend().emails.send({
+  return resend().emails.send({
     from: FROM,
     to: params.to,
     subject: `${params.workerName} submitted their onboarding checklist — ${params.projectName}`,
