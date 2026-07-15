@@ -82,7 +82,7 @@ export async function createProject(formData: FormData) {
     );
   }
 
-  redirect(`/admin/projects/${project.id}`);
+  redirect(`/admin/projects/${project.id}/workers`);
 }
 
 export async function addDocumentConfig(projectId: string, formData: FormData) {

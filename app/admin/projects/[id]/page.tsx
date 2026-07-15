@@ -34,8 +34,17 @@ export default async function ProjectConfigPage({ params }: { params: { id: stri
           <h1 className="text-base font-medium">{project.name}</h1>
           <p className="text-xs text-text-muted mt-0.5">{project.address}</p>
         </div>
-        <Link href={`/admin/projects/${project.id}/qr`} className="btn">
-          View QR sign-in
+      </div>
+
+      <div className="flex gap-0 border-b border-border mb-6">
+        <Link href={`/admin/projects/${project.id}/workers`} className="text-[13px] px-4 py-2.5 text-text-muted hover:text-text-primary">
+          Workers
+        </Link>
+        <Link href={`/admin/projects/${project.id}`} className="text-[13px] px-4 py-2.5 text-text-primary border-b-2 border-text-primary">
+          Configuration
+        </Link>
+        <Link href={`/admin/projects/${project.id}/qr`} className="text-[13px] px-4 py-2.5 text-text-muted hover:text-text-primary">
+          QR sign-in
         </Link>
       </div>
 
@@ -100,7 +109,15 @@ export default async function ProjectConfigPage({ params }: { params: { id: stri
           <input name="section_name" placeholder="New section name" required className="text-xs border border-border rounded px-2 py-1.5 flex-1" />
           <button className="btn text-xs">+ Add section</button>
         </form>
+
+        <div className="flex justify-end mt-4">
+          <Link href="/admin/projects" className="btn btn-primary">
+            Done! Back to projects.
+          </Link>
+        </div>
       </div>
     </div>
+
+    
   );
 }

@@ -22,7 +22,7 @@ export default function SiteSignInForm({ projectSlug }: { projectSlug: string })
       },
     });
     setLoading(false);
-    if (error) setError(error.message);
+    if (error) setError(error.message || "Failed to send sign-in link. Please try again.");
     else setSent(true);
   }
 
