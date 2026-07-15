@@ -42,7 +42,7 @@ function ChecklistPdfDocument(props: ChecklistPdfProps) {
         <Text style={styles.subtitle}>{projectName} · Submitted {new Date(submittedAt).toLocaleString()}</Text>
 
         <View style={styles.headerGrid}>
-          <View style={styles.headerField}><Text style={styles.headerLabel}>Worker's Name</Text><Text style={styles.headerValue}>{workerName}</Text></View>
+          <View style={styles.headerField}><Text style={styles.headerLabel}>Worker&apos;s Name</Text><Text style={styles.headerValue}>{workerName}</Text></View>
           <View style={styles.headerField}><Text style={styles.headerLabel}>Company</Text><Text style={styles.headerValue}>{company}</Text></View>
           <View style={styles.headerField}><Text style={styles.headerLabel}>Union / Trade</Text><Text style={styles.headerValue}>{unionTrade || "—"}</Text></View>
           <View style={styles.headerField}><Text style={styles.headerLabel}>Worker Type</Text><Text style={styles.headerValue}>{employeeType || "—"}</Text></View>
@@ -65,7 +65,7 @@ function ChecklistPdfDocument(props: ChecklistPdfProps) {
         ))}
 
         <View style={styles.sigBlock}>
-          <Text style={styles.sigLabel}>Worker's Signature</Text>
+          <Text style={styles.sigLabel}>Worker&apos;s Signature</Text>
           {signatureDataUrl ? (
             // eslint-disable-next-line jsx-a11y/alt-text -- this is @react-pdf/renderer's Image, not an <img>
             <Image src={signatureDataUrl} style={styles.sigImage} />

@@ -49,7 +49,7 @@ function LoginForm() {
     <div className="card w-full max-w-sm p-6">
       <h1 className="text-lg font-medium mb-1">Administrator sign in</h1>
       <p className="text-xs text-text-muted mb-5">
-        Enter your email. We'll send you a secure sign-in link — no password needed.
+      We&apos;ll send you a secure sign-in link.
       </p>
 
       {authErrorMessage && (
