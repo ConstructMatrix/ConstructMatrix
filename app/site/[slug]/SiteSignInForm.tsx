@@ -13,18 +13,26 @@ export default function SiteSignInForm({ projectSlug }: { projectSlug: string })
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const supabase = createClient();
+
     const redirect = `/onboarding?project=${projectSlug}`;
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
-      },
+    const res = await fetch("/api/send-magic-link", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
+      }),
     });
+
+    const json = await res.json();
     setLoading(false);
-    if (error) setError(error.message || "Failed to send sign-in link. Please try again.");
-    else setSent(true);
-  }
+
+    if (!res.ok) {
+      setError(json.error || "Failed to send sign-in link. Please try again.");
+    } else {
+      setSent(true);
+    }
+}
 
   if (sent) {
     return (

@@ -6,6 +6,19 @@ function resend() {
   return new Resend(process.env.RESEND_API_KEY);
 }
 
+  export async function sendDocumentUploadedNotice(params: {
+    to: string;
+    workerName: string;
+    documentType: string;
+    projectName: string;
+  }) {
+    return resend().emails.send({
+      from: FROM,
+      to: params.to,
+      subject: `${params.workerName} uploaded ${params.documentType} — ${params.projectName}`,
+      html: `<p>${params.workerName} has uploaded their <strong>${params.documentType}</strong> for <strong>${params.projectName}</strong>. Please review and verify it in the admin dashboard.</p>`,
+    });
+  }
 export async function sendExpiryAlert(params: {
   to: string;
   workerName: string;

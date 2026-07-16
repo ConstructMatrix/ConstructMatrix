@@ -136,18 +136,34 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
     metadata: { blocking_reasons: clearance.blockingReasons },
   });
 
-  const { data: admin } = await supabase.from("users").select("email").eq("id", project.admin_id).single();
-  if (admin?.email) {
-    try {
-      await sendChecklistSubmittedNotice({
-        to: admin.email,
-        workerName: input.workerName,
-        projectName: project.name,
-      });
-    } catch (err) {
-      console.error("Failed to send admin notification email", err);
-    }
-  }
+    const { data: managers } = await supabase
+      .from("project_members")
+      .select("users(email, role)")
+      .eq("project_id", project.id)
+      .in("users.role", ["admin", "manager"]);
 
+    const { data: admin } = await supabase
+      .from("users")
+      .select("email")
+      .eq("id", project.admin_id)
+      .single();
+
+    const emailsToNotify = new Set<string>();
+    if (admin?.email) emailsToNotify.add(admin.email);
+    (managers || []).forEach((m: any) => {
+      if (m.users?.email) emailsToNotify.add(m.users.email);
+    });
+
+    for (const email of emailsToNotify) {
+      try {
+        await sendChecklistSubmittedNotice({
+          to: email,
+          workerName: input.workerName,
+          projectName: project.name,
+        });
+      } catch (err) {
+        console.error("Failed to send notification email", err);
+      }
+    }
   return { ok: true };
 }

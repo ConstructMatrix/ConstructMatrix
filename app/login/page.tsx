@@ -14,27 +14,28 @@ function LoginForm() {
   const authError = params.get("error");
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOtp({
+  e.preventDefault();
+  setLoading(true);
+  setError(null);
+
+  const res = await fetch("/api/send-magic-link", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
       email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
-      },
-    });
-    setLoading(false);
-    if (error) {
-      if (error.message.toLowerCase().includes("rate")) {
-        setError("Too many sign-in attempts. Please wait a few minutes and try again.");
-      } else {
-        setError(error.message || "Something went wrong. Please try again.");
-      }
-    } else {
-      setSent(true);
-    }
+      redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
+    }),
+  });
+
+  const json = await res.json();
+  setLoading(false);
+
+  if (!res.ok) {
+    setError(json.error || "Failed to send sign-in link. Please try again.");
+  } else {
+    setSent(true);
   }
+}
 
   const authErrorMessage =
     authError === "not_authorized"

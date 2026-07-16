@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { scanCredentialImage } from "@/lib/claude";
+import { sendDocumentUploadedNotice } from "@/lib/email";
 
 export async function POST(request: Request) {
   const supabase = createClient();
@@ -58,6 +59,40 @@ export async function POST(request: Request) {
     target_id: doc.id,
     metadata: { document_type: documentType, project_id: projectId },
   });
+    await supabase.from("audit_log").insert({
+        user_id: user.id,
+        action: "document_uploaded",
+        target_type: "employee_document",
+        target_id: doc.id,
+        metadata: { document_type: documentType, project_id: projectId },
+      });
 
-  return NextResponse.json({ document: doc });
-}
+      // Notify managers
+      try {
+        const { data: project } = await supabase
+          .from("projects")
+          .select("name, admin_id")
+          .eq("id", projectId)
+          .single();
+        if (project) {
+          const { data: admin } = await supabase
+            .from("users")
+            .select("email")
+            .eq("id", project.admin_id)
+            .single();
+          if (admin?.email) {
+            await sendDocumentUploadedNotice({
+              to: admin.email,
+              workerName: user.email || "A worker",
+              documentType,
+              projectName: project.name,
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Failed to send document notification", err);
+      }
+
+      return NextResponse.json({ document: doc });
+    }
+ 
