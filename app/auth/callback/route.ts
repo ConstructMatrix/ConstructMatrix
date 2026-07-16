@@ -5,11 +5,6 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const redirectTo = searchParams.get("redirect") || "/admin";
-  const errorParam = searchParams.get("error");
-
-  if (errorParam) {
-    return NextResponse.redirect(`${origin}/login?error=link_expired`);
-  }
 
   if (!code) {
     return NextResponse.redirect(`${origin}/login?error=link_expired`);
@@ -19,7 +14,6 @@ export async function GET(request: Request) {
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    console.log("AUTH ERROR:", error);
     return NextResponse.redirect(`${origin}/login?error=link_expired`);
   }
 

@@ -5,11 +5,11 @@ import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: Request) {
-  const { email, redirectTo } = await request.json();
+  const { email } = await request.json();
   if (!email) return NextResponse.json({ error: "Email required" }, { status: 400 });
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://atconstructmatrix.com";
-  const callbackUrl = `${appUrl}/auth/confirm?redirect=%2Fadmin`;
+  const callbackUrl = `${appUrl}/auth/callback?redirect=%2Fadmin`;
 
   const supabase = createServiceRoleClient();
   const { data, error } = await supabase.auth.admin.generateLink({
@@ -19,11 +19,8 @@ export async function POST(request: Request) {
   });
 
   if (error || !data?.properties?.action_link) {
-    console.log("Generate link error:", error, data);
     return NextResponse.json({ error: error?.message || "Failed to generate link" }, { status: 500 });
   }
-
-  console.log("Action link:", data.properties.action_link);
 
   await resend.emails.send({
     from: "Construct Matrix <noreply@atconstructmatrix.com>",
