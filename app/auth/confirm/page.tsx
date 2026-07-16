@@ -9,15 +9,29 @@ export default function AuthConfirmPage() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
       if (session) {
         const params = new URLSearchParams(window.location.search);
         const redirect = params.get("redirect") || "/admin";
         router.push(redirect);
       } else {
-        router.push("/login?error=link_expired");
+        // Wait for session to be established from hash
+        supabase.auth.onAuthStateChange((event, session) => {
+          if (event === "SIGNED_IN" && session) {
+            const params = new URLSearchParams(window.location.search);
+            const redirect = params.get("redirect") || "/admin";
+            router.push(redirect);
+          } else if (event === "SIGNED_OUT" || !session) {
+            router.push("/login?error=link_expired");
+          }
+        });
       }
-    });
+    };
+
+    checkSession();
   }, [router]);
 
   return (
