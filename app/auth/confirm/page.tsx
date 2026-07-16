@@ -1,34 +1,42 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function AuthConfirmPage() {
-  const router = useRouter();
-  const [status, setStatus] = useState("Signing you in…");
-
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        setStatus("Redirecting…");
+    // Check immediately first
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
         const params = new URLSearchParams(window.location.search);
-        const redirect = params.get("redirect") || "/admin";
-        // Small delay to ensure cookie is set
-        setTimeout(() => {
-          window.location.href = redirect;
-        }, 500);
-      } else if (event === "INITIAL_SESSION" && !session) {
-        router.push("/login?error=link_expired");
+        const redirect = decodeURIComponent(params.get("redirect") || "/admin");
+        window.location.href = redirect;
+        return;
       }
+
+      // If no session yet, wait for auth state change
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === "SIGNED_IN" && session) {
+          const params = new URLSearchParams(window.location.search);
+          const redirect = decodeURIComponent(params.get("redirect") || "/admin");
+          window.location.href = redirect;
+        } else if (event === "INITIAL_SESSION" && !session) {
+          window.location.href = "/login?error=link_expired";
+        }
+      });
+
+      return () => subscription.unsubscribe();
     });
-  }, [router]);
+  }, []);
 
   return (
     <main className="min-h-screen flex items-center justify-center">
-      <p className="text-sm text-text-muted">{status}</p>
+      <div className="text-center">
+        <div className="w-6 h-6 border-2 border-text-primary border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+        <p className="text-sm text-text-muted">Signing you in…</p>
+      </div>
     </main>
   );
 }
