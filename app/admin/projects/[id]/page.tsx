@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import PageHeader from "@/components/PageHeader";
+import ProjectTabs from "../../ProjectTabs";
 import {
   addDocumentConfig,
   removeDocumentConfig,
@@ -28,96 +30,80 @@ export default async function ProjectConfigPage({ params }: { params: { id: stri
     .order("section_order");
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="mb-5 flex items-center justify-between">
-        <div>
-          <h1 className="text-base font-medium">{project.name}</h1>
-          <p className="text-xs text-text-muted mt-0.5">{project.address}</p>
-        </div>
-      </div>
+    <div className="p-6">
+      <PageHeader title={project.name} subtitle={project.address || undefined} />
+      <ProjectTabs projectId={project.id} active="config" />
 
-      <div className="flex gap-0 border-b border-border mb-6">
-        <Link href={`/admin/projects/${project.id}/workers`} className="text-[13px] px-4 py-2.5 text-text-muted hover:text-text-primary">
-          Workers
-        </Link>
-        <Link href={`/admin/projects/${project.id}`} className="text-[13px] px-4 py-2.5 text-text-primary border-b-2 border-text-primary">
-          Configuration
-        </Link>
-        <Link href={`/admin/projects/${project.id}/qr`} className="text-[13px] px-4 py-2.5 text-text-muted hover:text-text-primary">
-          QR sign-in
-        </Link>
-      </div>
-
-      <div className="card mb-4 overflow-hidden">
-        <div className="bg-surface-1 px-3 py-2 text-xs font-medium border-b border-border">
-          Required documents
-        </div>
+      <div className="card mb-5 overflow-hidden">
+        <div className="card-header">Required documents</div>
         {(docConfigs || []).map((c) => (
-          <div key={c.id} className="flex items-center justify-between px-3 py-2 border-b border-border last:border-b-0 text-xs">
+          <div key={c.id} className="flex items-center justify-between px-5 py-3 border-b border-border last:border-b-0 text-sm">
             <span>
-              {c.document_type} {c.is_mandatory ? <span className="text-text-danger">· mandatory</span> : <span className="text-text-muted">· optional</span>}
+              {c.document_type}{" "}
+              {c.is_mandatory ? (
+                <span className="text-text-danger text-xs font-medium">· mandatory</span>
+              ) : (
+                <span className="text-text-muted text-xs">· optional</span>
+              )}
             </span>
             <form action={removeDocumentConfig.bind(null, project.id, c.id)}>
-              <button className="text-text-muted text-[11px]">Remove</button>
+              <button className="text-text-muted text-xs hover:text-text-danger transition-colors">Remove</button>
             </form>
           </div>
         ))}
-        <form action={addDocumentConfig.bind(null, project.id)} className="flex gap-2 px-3 py-2.5 items-end">
-          <input name="document_type" placeholder="Document name" required className="text-xs border border-border rounded px-2 py-1.5 flex-1" />
-          <label className="text-xs flex items-center gap-1">
-            <input type="checkbox" name="is_mandatory" defaultChecked /> Mandatory
+        <form action={addDocumentConfig.bind(null, project.id)} className="flex flex-wrap gap-3 px-5 py-4 items-end bg-surface-1/50">
+          <input name="document_type" placeholder="Document name" required className="input flex-1 min-w-[160px] text-sm" />
+          <label className="text-sm flex items-center gap-2 cursor-pointer whitespace-nowrap">
+            <input type="checkbox" name="is_mandatory" defaultChecked className="rounded" /> Mandatory
           </label>
-          <button className="btn text-xs">+ Add document</button>
+          <button className="btn text-sm">+ Add document</button>
         </form>
       </div>
 
-      <div className="card mb-4 overflow-hidden">
-        <div className="bg-surface-1 px-3 py-2 text-xs font-medium border-b border-border">
-          Checklist sections
-        </div>
+      <div className="card overflow-hidden">
+        <div className="card-header">Checklist sections</div>
         {(sections || []).map((s: ChecklistSectionConfig) => (
-          <div key={s.id} className="px-3 py-2.5 border-b border-border last:border-b-0">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-medium">{s.section_name}</span>
+          <div key={s.id} className="px-5 py-4 border-b border-border last:border-b-0">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-semibold">{s.section_name}</span>
               <form action={removeChecklistSection.bind(null, project.id, s.id)}>
-                <button className="text-text-muted text-[11px]">Remove section</button>
+                <button className="text-text-muted text-xs hover:text-text-danger transition-colors">Remove section</button>
               </form>
             </div>
-            <div className="text-xs text-text-muted mb-2 space-y-1">
+            <div className="text-sm text-text-muted mb-3 space-y-2">
               {s.items.map((item, i) => (
-                <div key={i} className="flex items-center justify-between gap-2">
+                <div key={i} className="flex items-center justify-between gap-3 pl-2">
                   <span>
-                    <span className="text-text-muted mr-1">{i + 1}.</span>
-                    {item.text} {item.required && <span className="text-text-danger">(required)</span>}
+                    <span className="text-text-muted mr-2 font-medium">{i + 1}.</span>
+                    {item.text}{" "}
+                    {item.required && <span className="text-text-danger text-xs font-medium">(required)</span>}
                   </span>
                   <form action={removeChecklistItem.bind(null, project.id, s.id, i)}>
-                    <button className="text-text-muted text-[11px]">Remove</button>
+                    <button className="text-text-muted text-xs hover:text-text-danger transition-colors flex-shrink-0">Remove</button>
                   </form>
                 </div>
               ))}
             </div>
-            <form action={addChecklistItem.bind(null, s.id, project.id)} className="flex gap-2 items-center">
-              <input name="text" placeholder="New item text" required className="text-xs border border-border rounded px-2 py-1 flex-1" />
-              <label className="text-[11px] flex items-center gap-1">
-                <input type="checkbox" name="required" /> Required
+            <form action={addChecklistItem.bind(null, s.id, project.id)} className="flex flex-wrap gap-2 items-center">
+              <input name="text" placeholder="New item text" required className="input flex-1 min-w-[160px] text-sm" />
+              <label className="text-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+                <input type="checkbox" name="required" className="rounded" /> Required
               </label>
-              <button className="btn text-[11px]">+ Add item</button>
+              <button className="btn text-xs">+ Add item</button>
             </form>
           </div>
         ))}
-        <form action={addChecklistSection.bind(null, project.id)} className="flex gap-2 px-3 py-2.5">
-          <input name="section_name" placeholder="New section name" required className="text-xs border border-border rounded px-2 py-1.5 flex-1" />
-          <button className="btn text-xs">+ Add section</button>
+        <form action={addChecklistSection.bind(null, project.id)} className="flex flex-wrap gap-3 px-5 py-4 bg-surface-1/50">
+          <input name="section_name" placeholder="New section name" required className="input flex-1 min-w-[160px] text-sm" />
+          <button className="btn text-sm">+ Add section</button>
         </form>
 
-        <div className="flex justify-end mt-4">
+        <div className="flex justify-end p-5 border-t border-border">
           <Link href="/admin/projects" className="btn btn-primary">
-            Done! Back to projects.
+            Done — back to projects
           </Link>
         </div>
       </div>
     </div>
-
-    
   );
 }

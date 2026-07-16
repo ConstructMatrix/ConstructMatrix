@@ -19,24 +19,36 @@ export default async function SiteSignInPage({ params }: { params: { slug: strin
   if (!project) notFound();
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6">
-      <div className="card w-full max-w-sm overflow-hidden">
-        <div className="bg-surface-1 border-b border-border px-4 py-2 flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-border-strong" />
-          <span className="w-1.5 h-1.5 rounded-full bg-border-strong" />
-          <span className="w-1.5 h-1.5 rounded-full bg-border-strong" />
-          <span className="text-[10px] text-text-muted ml-1">constructmatrix</span>
+    <main className="min-h-screen flex items-center justify-center p-6 bg-surface-0">
+      <div className="card w-full max-w-sm overflow-hidden shadow-md">
+        <div className="browser-chrome">
+          <span className="browser-dot" />
+          <span className="browser-dot" />
+          <span className="browser-dot" />
+          <span className="text-xs text-text-muted ml-2">constructmatrix.com</span>
         </div>
-        <div className="p-5">
-          <h1 className="text-base font-medium">{project.name}</h1>
-          {project.address && <p className="text-xs text-text-muted mb-3">{project.address}</p>}
+        <div className="p-6">
+          <div className="w-10 h-10 rounded-lg bg-brand text-white font-bold text-sm flex items-center justify-center mb-4">
+            CM
+          </div>
+          <h1 className="text-lg font-semibold tracking-tight">{project.name}</h1>
+          {project.address && <p className="text-sm text-text-muted mt-1 mb-5">{project.address}</p>}
           <SiteSignInForm projectSlug={project.slug} />
-          <div className="mt-4 pt-3 border-t border-border text-xs text-text-muted space-y-1.5">
-            <div>✓ Complete site checklist</div>
-            <div>✓ Upload credentials</div>
+          <div className="mt-6 pt-5 border-t border-border space-y-2">
+            <StepItem label="Complete site checklist" />
+            <StepItem label="Upload credentials" />
           </div>
         </div>
       </div>
     </main>
+  );
+}
+
+function StepItem({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-2.5 text-sm text-text-muted">
+      <span className="w-5 h-5 rounded-full bg-bg-success text-text-success flex items-center justify-center text-xs flex-shrink-0">✓</span>
+      {label}
+    </div>
   );
 }

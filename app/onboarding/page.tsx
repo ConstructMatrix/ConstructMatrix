@@ -34,10 +34,11 @@ export default async function OnboardingPage({
 
   if (!projectSlug) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-6 text-center">
-        <p className="text-sm text-text-muted">
-          No project found. Scan your site&apos;s QR code to begin onboarding.
-        </p>
+      <main className="min-h-screen flex items-center justify-center p-6 bg-surface-0">
+        <div className="empty-state card max-w-md">
+          <div className="text-3xl mb-3">📱</div>
+          <p>No project found. Scan your site&apos;s QR code to begin onboarding.</p>
+        </div>
       </main>
     );
   }
@@ -50,8 +51,10 @@ export default async function OnboardingPage({
 
   if (!project) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-6 text-center">
-        <p className="text-sm text-text-muted">Project not found.</p>
+      <main className="min-h-screen flex items-center justify-center p-6 bg-surface-0">
+        <div className="empty-state card max-w-md">
+          <p>Project not found.</p>
+        </div>
       </main>
     );
   }

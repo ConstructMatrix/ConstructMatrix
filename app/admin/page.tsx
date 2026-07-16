@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { computeClearance } from "@/lib/validation";
 import StatusPill from "@/components/StatusPill";
+import PageHeader from "@/components/PageHeader";
 import FilterBar from "./FilterBar";
 import type { ProjectStatus } from "@/lib/types";
 
@@ -84,49 +85,46 @@ export default async function AdminDashboardPage({
   };
 
   return (
-    <div className="p-5">
-      <div className="mb-5">
-        <h1 className="text-base font-medium">Employee status</h1>
-        <p className="text-xs text-text-muted mt-0.5">All projects · Admin view</p>
-      </div>
+    <div className="p-6">
+      <PageHeader title="Employee status" subtitle="All projects · Admin view" />
 
-      <div className="grid grid-cols-4 gap-2 mb-5">
-        <Stat label="Total Employees" value={stats.total} />
-        <Stat label="Cleared" value={stats.cleared} />
-        <Stat label="Pending" value={stats.pending} />
-        <Stat label="Action needed" value={stats.blocked} />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <Stat label="Total employees" value={stats.total} />
+        <Stat label="Cleared" value={stats.cleared} accent="success" />
+        <Stat label="Pending" value={stats.pending} accent="warning" />
+        <Stat label="Action needed" value={stats.blocked} accent="danger" />
       </div>
 
       <FilterBar projects={projects || []} />
 
       <div className="card overflow-hidden">
-        <div className="bg-surface-1 grid grid-cols-4 px-3 py-1.5 text-[11px] text-text-muted font-medium border-b border-border">
+        <div className="table-header grid-cols-4">
           <span>Employee</span>
           <span>Type</span>
           <span>Documents</span>
           <span>Status</span>
         </div>
         {roster.length === 0 && (
-          <div className="px-3 py-6 text-xs text-text-muted text-center">No Employees match these filters.</div>
+          <div className="empty-state">No employees match these filters.</div>
         )}
         {roster.map((m) => (
           <Link
             key={`${m.project_id}-${m.user_id}`}
             href={`/admin/employees/${m.user_id}?project=${m.project_id}`}
-            className="grid grid-cols-4 px-3 py-2 border-b border-border last:border-b-0 items-center hover:bg-surface-1"
+            className="table-row table-row-hover grid-cols-4"
           >
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-surface-1 border border-border flex items-center justify-center text-[11px] font-medium text-text-secondary">
+            <div className="flex items-center gap-3">
+              <div className="avatar">
                 {initials(m.users?.full_name)}
               </div>
               <div>
-                <div className="text-[13px] font-medium">{m.users?.full_name || m.users?.email}</div>
-                <div className="text-[11px] text-text-muted">{m.users?.position || "—"}</div>
+                <div className="text-sm font-semibold">{m.users?.full_name || m.users?.email}</div>
+                <div className="text-xs text-text-muted">{m.users?.position || "—"}</div>
               </div>
             </div>
-            <div className="text-xs text-text-muted capitalize">{m.users?.employee_type || "—"}</div>
+            <div className="text-sm text-text-muted capitalize">{m.users?.employee_type || "—"}</div>
             <div
-              className={`text-xs ${m.status === "cleared" ? "text-text-success" : m.status === "blocked" ? "text-text-danger" : "text-text-warning"}`}
+              className={`text-sm ${m.status === "cleared" ? "text-text-success" : m.status === "blocked" ? "text-text-danger" : "text-text-warning"}`}
             >
               {m.docsLabel}
               {m.status === "blocked" && m.blockingReasons[0] ? ` — ${m.blockingReasons[0]}` : ""}
@@ -137,9 +135,9 @@ export default async function AdminDashboardPage({
           </Link>
         ))}
       </div>
-      <div className="card border-t-0 rounded-t-none bg-surface-1 px-3 py-2 text-[11px] text-text-muted">
-        Click a employee to view their documents and checklist submissions.
-      </div>
+      <p className="text-xs text-text-muted mt-3 px-1">
+        Click an employee to view their documents and checklist submissions.
+      </p>
     </div>
   );
 }
@@ -148,11 +146,16 @@ function isExpired(expiryDate: string | null) {
   return !!expiryDate && new Date(expiryDate) < new Date(new Date().toDateString());
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, value, accent }: { label: string; value: number; accent?: "success" | "warning" | "danger" }) {
+  const accentColors = {
+    success: "text-text-success",
+    warning: "text-text-warning",
+    danger: "text-text-danger",
+  };
   return (
-    <div className="card bg-surface-1 px-4 py-3">
-      <div className="text-[11px] text-text-muted mb-1">{label}</div>
-      <div className="text-xl font-medium">{value}</div>
+    <div className="stat-card">
+      <div className="stat-label">{label}</div>
+      <div className={`stat-value ${accent ? accentColors[accent] : ""}`}>{value}</div>
     </div>
   );
 }

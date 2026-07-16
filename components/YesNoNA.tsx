@@ -9,11 +9,11 @@ export default function YesNoNA({
   value: ChecklistResponseValue;
   onChange: (v: ChecklistResponseValue) => void;
 }) {
-  const base = "text-[11px] px-2 py-1 rounded border font-normal";
-  const off = "border-border text-text-muted bg-transparent";
-  const yes = "border-border-success text-text-success bg-bg-success";
-  const no = "border-border-danger text-text-danger bg-bg-danger";
-  const na = "border-border-strong text-text-muted bg-surface-1";
+  const base = "text-xs font-medium px-3 py-1.5 rounded-md border transition-all duration-150";
+  const off = "border-border text-text-muted bg-surface-2 hover:bg-surface-1";
+  const yes = "border-border-success text-text-success bg-bg-success shadow-sm";
+  const no = "border-border-danger text-text-danger bg-bg-danger shadow-sm";
+  const na = "border-border-strong text-text-secondary bg-surface-1 shadow-sm";
 
   return (
     <div className="flex gap-1 flex-shrink-0">

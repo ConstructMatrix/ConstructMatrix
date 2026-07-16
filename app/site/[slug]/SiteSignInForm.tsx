@@ -30,25 +30,31 @@ export default function SiteSignInForm({ projectSlug }: { projectSlug: string })
 
   if (sent) {
     return (
-      <p className="text-xs">
-        We sent a sign-in link to <strong>{email}</strong>. Open it on this device to continue.
-      </p>
+      <div className="alert alert-success">
+        <p className="text-sm">
+          We sent a sign-in link to <strong>{email}</strong>. Open it on this device to continue.
+        </p>
+      </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-      <p className="text-xs text-text-muted mb-1">Enter your email to continue</p>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <p className="text-sm text-text-muted">Enter your email to continue</p>
       <input
         type="email"
         required
         placeholder="name@company.com"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="text-xs border border-border rounded px-2 py-2 outline-none w-full"
+        className="input"
       />
-      {error && <p className="text-xs text-text-danger">{error}</p>}
-      <button type="submit" disabled={loading} className="btn btn-primary justify-center flex text-xs">
+      {error && (
+        <div className="alert alert-danger">
+          <p className="text-sm">{error}</p>
+        </div>
+      )}
+      <button type="submit" disabled={loading} className="btn btn-primary w-full">
         {loading ? "Sending…" : "Continue"}
       </button>
     </form>

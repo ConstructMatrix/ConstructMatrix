@@ -9,11 +9,11 @@ interface Props {
 
 const SignaturePad = forwardRef<SignatureCanvas, Props>(({ onEnd }, ref) => {
   return (
-    <div className="border border-border rounded bg-surface-1">
+    <div className="border border-border rounded-lg bg-surface-1 overflow-hidden">
       <SignatureCanvas
         ref={ref}
-        penColor="black"
-        canvasProps={{ className: "w-full h-[90px]", style: { width: "100%", height: 90 } }}
+        penColor="#1c1917"
+        canvasProps={{ className: "w-full h-[100px]", style: { width: "100%", height: 100 } }}
         onEnd={onEnd}
       />
     </div>

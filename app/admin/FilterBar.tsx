@@ -19,9 +19,9 @@ export default function FilterBar({
   }
 
   return (
-    <div className="flex gap-2 mb-4 items-center">
+    <div className="flex flex-wrap gap-2 mb-5 items-center">
       <select
-        className="text-xs border border-border rounded px-2 py-1.5"
+        className="select"
         defaultValue={searchParams.get("type") || "all"}
         onChange={(e) => update("type", e.target.value)}
       >
@@ -31,7 +31,7 @@ export default function FilterBar({
         <option value="subcontractor">Subcontractor</option>
       </select>
       <select
-        className="text-xs border border-border rounded px-2 py-1.5"
+        className="select"
         defaultValue={searchParams.get("status") || "all"}
         onChange={(e) => update("status", e.target.value)}
       >
@@ -42,7 +42,7 @@ export default function FilterBar({
         <option value="blocked">Action needed</option>
       </select>
       <select
-        className="text-xs border border-border rounded px-2 py-1.5"
+        className="select"
         defaultValue={searchParams.get("project") || "all"}
         onChange={(e) => update("project", e.target.value)}
       >

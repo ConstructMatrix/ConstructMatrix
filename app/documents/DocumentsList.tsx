@@ -46,7 +46,7 @@ export default function DocumentsList({
       if (res.ok) {
         setDocs((prev) => [json.document, ...prev]);
         setToast(true);
-        setTimeout(() => setToast(false), 3000);
+        setTimeout(() => setToast(false), 4000);
       }
     };
     reader.readAsDataURL(file);
@@ -61,22 +61,22 @@ export default function DocumentsList({
     const isUploading = uploading === config.document_type;
 
     return (
-      <div className="flex items-center gap-3 px-4 py-4 border-b border-border last:border-b-0">
+      <div className="flex items-center gap-4 px-5 py-4 border-b border-border last:border-b-0">
         <div
-          className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0  ${
+          className={`w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0 text-base font-medium ${
             status === "verified"
-              ? "bg-bg-success text-text-success"
+              ? "bg-bg-success text-text-success border border-border-success"
               : status === "pending"
-                ? "bg-bg-warning text-text-warning"
-                : "bg-surface-1 text-text-muted"
+                ? "bg-bg-warning text-text-warning border border-border-warning"
+                : "bg-surface-1 text-text-muted border border-border"
           }`}
         >
           {status === "verified" ? "✓" : status === "pending" ? "…" : "↑"}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium">{config.document_type}</div>
+          <div className="text-sm font-semibold text-text-primary">{config.document_type}</div>
           <div className="text-xs text-text-muted mt-0.5">
-            {status === "verified" && "Verified"}
+            {status === "verified" && "Verified by supervisor"}
             {status === "pending" && (isUploading ? "Scanning with AI…" : "Uploaded · Waiting for review")}
             {status === "missing" && (config.is_mandatory ? "Not yet uploaded" : "Optional · Not uploaded")}
           </div>
@@ -87,7 +87,7 @@ export default function DocumentsList({
           <div className="flex items-center gap-2">
             <span className="pill pill-warn">Pending</span>
             <button
-              className="text-xs text-text-danger"
+              className="text-xs text-text-danger hover:underline"
               onClick={async () => {
                 if (!doc) return;
                 await fetch(`/api/delete-document`, {
@@ -115,7 +115,7 @@ export default function DocumentsList({
               }}
             />
             <button
-              className="w-7 h-7 rounded border border-dashed border-border-strong text-text-muted flex items-center justify-center"
+              className="w-9 h-9 rounded-lg border-2 border-dashed border-border-strong text-text-muted flex items-center justify-center hover:border-brand hover:text-brand transition-colors"
               onClick={() => fileInputs.current[config.document_type]?.click()}
               disabled={isUploading}
               aria-label={`Upload ${config.document_type}`}
@@ -131,21 +131,21 @@ export default function DocumentsList({
   return (
     <>
       {toast && (
-        <div className="toast card border-border-success p-2.5 mb-3 text-xs flex items-center gap-2">
+        <div className="toast mb-4 flex items-center gap-2">
           <span>✓ Document uploaded. Your supervisor has been notified to review it.</span>
         </div>
       )}
       {mandatory.length > 0 && (
-        <div className="card mb-3 overflow-hidden">
-          <div className="bg-surface-1 px-3 py-2 text-xs font-medium border-b border-border">Required documents</div>
+        <div className="card mb-4 overflow-hidden">
+          <div className="card-header">Required documents</div>
           {mandatory.map((c) => (
             <Row key={c.id} config={c} />
           ))}
         </div>
       )}
       {optional.length > 0 && (
-        <div className="card mb-3 overflow-hidden">
-          <div className="bg-surface-1 px-3 py-2 text-xs font-medium border-b border-border">Additional documents</div>
+        <div className="card overflow-hidden">
+          <div className="card-header">Additional documents</div>
           {optional.map((c) => (
             <Row key={c.id} config={c} />
           ))}

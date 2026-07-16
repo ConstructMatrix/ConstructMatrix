@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import DocumentsList from "./DocumentsList";
+import PageHeader from "@/components/PageHeader";
 
 export default async function DocumentsPage({
   searchParams,
@@ -27,8 +28,11 @@ export default async function DocumentsPage({
 
   if (!projectSlug) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-6 text-center">
-        <p className="text-sm text-text-muted">No project found. Scan your site&apos;s QR code to begin onboarding.</p>
+      <main className="min-h-screen flex items-center justify-center p-6 bg-surface-0">
+        <div className="empty-state card max-w-md">
+          <div className="text-3xl mb-3">📱</div>
+          <p>No project found. Scan your site&apos;s QR code to begin onboarding.</p>
+        </div>
       </main>
     );
   }
@@ -36,8 +40,10 @@ export default async function DocumentsPage({
   const { data: project } = await supabase.from("projects").select("id, name").eq("slug", projectSlug).single();
   if (!project) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-6 text-center">
-        <p className="text-sm text-text-muted">Project not found.</p>
+      <main className="min-h-screen flex items-center justify-center p-6 bg-surface-0">
+        <div className="empty-state card max-w-md">
+          <p>Project not found.</p>
+        </div>
       </main>
     );
   }
@@ -56,21 +62,21 @@ export default async function DocumentsPage({
     .order("created_at", { ascending: false });
 
   return (
-    <div className="max-w-2xl mx-auto p-5">
-      <div className="mb-5">
-        <h1 className="text-base font-medium">Documents</h1>
-        <p className="text-xs text-text-muted mt-0.5">
-          {project.name} · Upload copies of your credentials. Your supervisor will verify each one.
+    <main className="min-h-screen bg-surface-0 py-8 px-4">
+      <div className="max-w-2xl mx-auto">
+        <PageHeader
+          title="Documents"
+          subtitle={`${project.name} · Upload copies of your credentials. Your supervisor will verify each one.`}
+        />
+        <DocumentsList
+          projectId={project.id}
+          docConfigs={docConfigs || []}
+          employeeDocs={employeeDocs || []}
+        />
+        <p className="text-xs text-text-muted card p-4 mt-4 leading-relaxed">
+          Expiry dates and document details are managed by your site manager.
         </p>
       </div>
-      <DocumentsList
-        projectId={project.id}
-        docConfigs={docConfigs || []}
-        employeeDocs={employeeDocs || []}
-      />
-      <p className="text-[11px] text-text-muted card p-3 mt-3">
-        Expiry dates and document details are managed by your site manager.
-      </p>
-    </div>
+    </main>
   );
 }

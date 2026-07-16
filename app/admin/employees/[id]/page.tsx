@@ -59,38 +59,48 @@ export default async function EmployeeDetailPage({
   );
 
   return (
-    <div className="p-5">
-      <div className="mb-5">
-        <h1 className="text-base font-medium">{employee.full_name || employee.email}</h1>
-        <p className="text-xs text-text-muted mt-0.5">
-          {employee.position || "—"} · <span className="capitalize">{employee.employee_type || "—"}</span> · {project.name} ·{" "}
+    <div className="p-6">
+      <div className="page-header">
+        <h1 className="page-title">{employee.full_name || employee.email}</h1>
+        <div className="flex flex-wrap items-center gap-2 mt-2">
+          <span className="text-sm text-text-muted">
+            {employee.position || "—"} · <span className="capitalize">{employee.employee_type || "—"}</span> · {project.name}
+          </span>
           <StatusPill status={clearance.status} />
-        </p>
+        </div>
         {clearance.blockingReasons.length > 0 && (
-          <p className="text-[11px] text-text-danger mt-1">{clearance.blockingReasons.join(" · ")}</p>
+          <p className="text-sm text-text-danger mt-2">{clearance.blockingReasons.join(" · ")}</p>
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
-          <SectionLabel>Documents uploaded</SectionLabel>
+          <div className="section-label">Documents uploaded</div>
           <div className="card overflow-hidden mb-4">
             {(docConfigs || []).map((config) => {
               const doc = latestByType.get(config.document_type);
               const status = !doc ? "missing" : doc.confirmed_at ? "verified" : "pending";
               return (
-                <div key={config.id} className="flex items-center gap-2.5 px-3 py-2.5 border-b border-border last:border-b-0 text-xs">
+                <div key={config.id} className="flex items-center gap-3 px-5 py-3.5 border-b border-border last:border-b-0">
                   <div
-                    className={`w-7 h-7 rounded flex items-center justify-center flex-shrink-0 ${
-                      status === "verified" ? "bg-bg-success text-text-success" : status === "pending" ? "bg-bg-warning text-text-warning" : "bg-surface-1 text-text-muted"
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-sm font-medium ${
+                      status === "verified"
+                        ? "bg-bg-success text-text-success border border-border-success"
+                        : status === "pending"
+                          ? "bg-bg-warning text-text-warning border border-border-warning"
+                          : "bg-surface-1 text-text-muted border border-border"
                     }`}
                   >
                     {status === "verified" ? "✓" : status === "pending" ? "…" : "↑"}
                   </div>
                   <div className="flex-1">
-                    <div className="text-[13px] font-medium">{config.document_type}</div>
-                    <div className="text-[11px] text-text-muted">
-                      {doc?.expiry_date ? `Expires ${new Date(doc.expiry_date).toLocaleDateString()}` : status === "missing" ? "Not yet uploaded" : "Waiting for review"}
+                    <div className="text-sm font-semibold">{config.document_type}</div>
+                    <div className="text-xs text-text-muted">
+                      {doc?.expiry_date
+                        ? `Expires ${new Date(doc.expiry_date).toLocaleDateString()}`
+                        : status === "missing"
+                          ? "Not yet uploaded"
+                          : "Waiting for review"}
                     </div>
                   </div>
                   <span className={`pill ${status === "verified" ? "pill-ok" : status === "pending" ? "pill-warn" : ""}`}>
@@ -100,27 +110,27 @@ export default async function EmployeeDetailPage({
               );
             })}
           </div>
-          <p className="text-[11px] text-text-muted card p-2.5 mb-5">Expiry dates visible to admins only.</p>
+          <p className="text-xs text-text-muted card p-3 mb-6 leading-relaxed">Expiry dates visible to admins only.</p>
 
-          <SectionLabel>Checklist history</SectionLabel>
+          <div className="section-label">Checklist history</div>
           <div className="card overflow-hidden">
             {submissionDownloads.length === 0 && (
-              <div className="px-3 py-4 text-xs text-text-muted text-center">No submissions yet.</div>
+              <div className="empty-state py-8">No submissions yet.</div>
             )}
             {submissionDownloads.map((s) => (
-              <div key={s.id} className="flex items-center gap-2.5 px-3 py-2 border-b border-border last:border-b-0">
-                <div className="w-7 h-7 rounded bg-bg-success text-text-success flex items-center justify-center flex-shrink-0 text-xs">✓</div>
+              <div key={s.id} className="flex items-center gap-3 px-5 py-3.5 border-b border-border last:border-b-0">
+                <div className="w-9 h-9 rounded-lg bg-bg-success text-text-success border border-border-success flex items-center justify-center flex-shrink-0 text-sm">✓</div>
                 <div className="flex-1">
-                  <div className="text-[13px] font-medium">{project.name} orientation</div>
-                  <div className="text-[11px] text-text-muted">Submitted {new Date(s.submitted_at).toLocaleDateString()}</div>
+                  <div className="text-sm font-semibold">{project.name} orientation</div>
+                  <div className="text-xs text-text-muted">Submitted {new Date(s.submitted_at).toLocaleDateString()}</div>
                 </div>
-                <div className="flex gap-2 text-[11px]">
+                <div className="flex gap-2 text-xs">
                   {s.pdfUrl && (
-                    <a href={s.pdfUrl} target="_blank" rel="noreferrer" className="text-text-muted" title="Download PDF">
+                    <a href={s.pdfUrl} target="_blank" rel="noreferrer" className="btn text-xs py-1 px-2" title="Download PDF">
                       PDF
                     </a>
                   )}
-                  <a href={`/api/checklist/${s.id}/docx`} className="text-text-muted" title="Download Word doc">
+                  <a href={`/api/checklist/${s.id}/docx`} className="btn text-xs py-1 px-2" title="Download Word doc">
                     Word
                   </a>
                 </div>
@@ -130,20 +140,14 @@ export default async function EmployeeDetailPage({
         </div>
 
         <div>
-          <SectionLabel>Latest upload — AI scan</SectionLabel>
+          <div className="section-label">Latest upload — AI scan</div>
           {pendingDoc ? (
             <DocumentReviewCard doc={pendingDoc} photoUrl={pendingPhotoUrl} />
           ) : (
-            <div className="card p-4 text-xs text-text-muted">No documents awaiting review.</div>
+            <div className="card p-6 empty-state py-12">No documents awaiting review.</div>
           )}
         </div>
       </div>
     </div>
-  );
-}
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="text-[12px] font-medium mb-2 text-text-muted uppercase tracking-wide">{children}</div>
   );
 }
