@@ -46,11 +46,13 @@ export async function updateSession(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
-    const { data: profile } = await adminClient
+    const { data: profile, error: profileError } = await adminClient
       .from("users")
       .select("role")
       .eq("id", user.id)
       .single();
+
+    console.log("MIDDLEWARE - user:", user.id, "profile:", profile, "error:", profileError);
 
     if (!profile || !["admin", "manager"].includes(profile.role)) {
       const redirectUrl = request.nextUrl.clone();
@@ -59,6 +61,7 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(redirectUrl);
     }
   }
+  
 
   return response;
 }

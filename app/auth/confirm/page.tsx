@@ -7,21 +7,32 @@ export default function AuthConfirmPage() {
   useEffect(() => {
     const supabase = createClient();
 
-    // Check immediately first
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
-        const params = new URLSearchParams(window.location.search);
-        const redirect = decodeURIComponent(params.get("redirect") || "/admin");
-        window.location.href = redirect;
+        // Exchange session for server-readable cookies
+        await fetch("/api/set-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            access_token: session.access_token,
+            refresh_token: session.refresh_token,
+          }),
+        });
+        window.location.href = "/admin";
         return;
       }
 
-      // If no session yet, wait for auth state change
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
         if (event === "SIGNED_IN" && session) {
-          const params = new URLSearchParams(window.location.search);
-          const redirect = decodeURIComponent(params.get("redirect") || "/admin");
-          window.location.href = redirect;
+          await fetch("/api/set-session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              access_token: session.access_token,
+              refresh_token: session.refresh_token,
+            }),
+          });
+          window.location.href = "/admin";
         } else if (event === "INITIAL_SESSION" && !session) {
           window.location.href = "/login?error=link_expired";
         }
