@@ -9,28 +9,21 @@ export async function POST(request: Request) {
   if (!email) return NextResponse.json({ error: "Email required" }, { status: 400 });
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://atconstructmatrix.com";
-  
-  // Extract just the path from redirectTo and rebuild with production URL
-  let redirectPath = "/admin";
-  try {
-    const url = new URL(redirectTo);
-    redirectPath = url.pathname + url.search;
-  } catch {
-    redirectPath = redirectTo;
-  }
-
-  const finalRedirectTo = `${appUrl}/auth/callback?redirect=${encodeURIComponent(redirectPath.replace("/auth/callback?redirect=", ""))}`;
+  const callbackUrl = `${appUrl}/auth/callback?redirect=%2Fadmin`;
 
   const supabase = createServiceRoleClient();
   const { data, error } = await supabase.auth.admin.generateLink({
     type: "magiclink",
     email,
-    options: { redirectTo: finalRedirectTo },
+    options: { redirectTo: callbackUrl },
   });
 
   if (error || !data?.properties?.action_link) {
+    console.log("Generate link error:", error, data);
     return NextResponse.json({ error: error?.message || "Failed to generate link" }, { status: 500 });
   }
+
+  console.log("Action link:", data.properties.action_link);
 
   await resend.emails.send({
     from: "Construct Matrix <noreply@atconstructmatrix.com>",
