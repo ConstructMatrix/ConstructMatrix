@@ -6,40 +6,37 @@ import { createClient } from "@/lib/supabase/client";
 export default function AuthConfirmPage() {
   useEffect(() => {
     const supabase = createClient();
+    const params = new URLSearchParams(window.location.search);
+    const redirect = decodeURIComponent(params.get("redirect") || "/admin");
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session) {
-        // Exchange session for server-readable cookies
-        await fetch("/api/set-session", {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        const res = await fetch("/api/set-session", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             access_token: session.access_token,
             refresh_token: session.refresh_token,
+            redirect,
           }),
         });
-        window.location.href = "/admin";
-        return;
-      }
 
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event === "SIGNED_IN" && session) {
-          await fetch("/api/set-session", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              access_token: session.access_token,
-              refresh_token: session.refresh_token,
-            }),
-          });
-          window.location.href = "/admin";
-        } else if (event === "INITIAL_SESSION" && !session) {
-          window.location.href = "/login?error=link_expired";
+        if (res.ok) {
+          window.location.href = redirect;
+        } else {
+          const json = await res.json();
+          if (json.error === "not_authorized") {
+            window.location.href = "/login?error=not_authorized";
+          } else {
+            window.location.href = "/login?error=link_expired";
+          }
         }
-      });
-
-      return () => subscription.unsubscribe();
+      } else if (event === "INITIAL_SESSION" && !session) {
+        window.location.href = "/login?error=link_expired";
+      }
     });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   return (
