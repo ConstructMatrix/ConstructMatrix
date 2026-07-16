@@ -14,28 +14,27 @@ function LoginForm() {
   const authError = params.get("error");
 
   async function handleSubmit(e: React.FormEvent) {
-  e.preventDefault();
-  setLoading(true);
-  setError(null);
-
-  const res = await fetch("/api/send-magic-link", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithOtp({
       email,
-      redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
-    }),
-  });
-
-  const json = await res.json();
-  setLoading(false);
-
-  if (!res.ok) {
-    setError(json.error || "Failed to send sign-in link. Please try again.");
-  } else {
-    setSent(true);
+      options: {
+        emailRedirectTo: `https://atconstructmatrix.com/auth/callback?redirect=${encodeURIComponent(redirect)}`,
+      },
+    });
+    setLoading(false);
+    if (error) {
+      if (error.message.toLowerCase().includes("rate")) {
+        setError("Too many attempts. Please wait a few minutes and try again.");
+      } else {
+        setError(error.message || "Failed to send sign-in link. Please try again.");
+      }
+    } else {
+      setSent(true);
+    }
   }
-}
 
   const authErrorMessage =
     authError === "not_authorized"
@@ -50,7 +49,7 @@ function LoginForm() {
     <div className="card w-full max-w-sm p-6">
       <h1 className="text-lg font-medium mb-1">Administrator sign in</h1>
       <p className="text-xs text-text-muted mb-5">
-      We&apos;ll send you a secure sign-in link.
+        We&apos;ll send you a secure sign-in link.
       </p>
 
       {authErrorMessage && (

@@ -13,27 +13,20 @@ export default function SiteSignInForm({ projectSlug }: { projectSlug: string })
     e.preventDefault();
     setLoading(true);
     setError(null);
-
-    const redirect = `/onboarding?project=${projectSlug}`;
-    const res = await fetch("/api/send-magic-link", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email,
-        redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
-      }),
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `https://atconstructmatrix.com/auth/callback?redirect=${encodeURIComponent(`/onboarding?project=${projectSlug}`)}`,
+      },
     });
-
-    const json = await res.json();
     setLoading(false);
-
-    if (!res.ok) {
-      setError(json.error || "Failed to send sign-in link. Please try again.");
+    if (error) {
+      setError(error.message || "Failed to send sign-in link. Please try again.");
     } else {
       setSent(true);
     }
-}
-
+  }
   if (sent) {
     return (
       <p className="text-xs">
