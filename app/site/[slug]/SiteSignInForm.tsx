@@ -27,6 +27,7 @@ export default function SiteSignInForm({ projectSlug }: { projectSlug: string })
       setSent(true);
     }
   }
+
   if (sent) {
     return (
       <p className="text-xs">

@@ -20,14 +20,12 @@ export default function NewProjectPage({ searchParams }: { searchParams: { error
                 <input type="radio" name="onboarding_type" value="external" defaultChecked />
                 <span className="text-sm font-medium">External</span>
               </div>
-              <span className="text-[11px] text-text-muted pl-5">Site supervisor onboards contractors, subcontractors, consultants on arrival</span>
             </label>
             <label className="flex flex-col gap-1 border border-border rounded-lg p-3 cursor-pointer has-[:checked]:border-text-primary has-[:checked]:bg-surface-1">
               <div className="flex items-center gap-2">
                 <input type="radio" name="onboarding_type" value="internal" />
                 <span className="text-sm font-medium">Internal</span>
               </div>
-              <span className="text-[11px] text-text-muted pl-5">HR onboards internal employees and tracks training expiry dates</span>
             </label>
           </div>
         </div>
