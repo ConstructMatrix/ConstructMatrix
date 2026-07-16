@@ -14,10 +14,11 @@ export default function SiteSignInForm({ projectSlug }: { projectSlug: string })
     setLoading(true);
     setError(null);
     const supabase = createClient();
+    const redirectPath = `/onboarding?project=${projectSlug}`;
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `https://atconstructmatrix.com/auth/callback?redirect=${encodeURIComponent(`/onboarding?project=${projectSlug}`)}`,
+        emailRedirectTo: `https://atconstructmatrix.com/auth/callback?redirect=${encodeURIComponent(redirectPath)}`,
       },
     });
     setLoading(false);

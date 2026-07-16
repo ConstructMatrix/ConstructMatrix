@@ -49,17 +49,17 @@ export default async function HistoryPage({
       </div>
 
       <div className="card overflow-hidden">
-        <div className="table-header grid-cols-4">
+        <div className="grid grid-cols-4 px-4 py-3 bg-surface-1 border-b border-border text-xs font-medium text-text-muted uppercase tracking-wide">
           <span>Worker</span>
           <span>Project</span>
           <span>Submitted</span>
           <span>Export</span>
         </div>
         {withUrls.length === 0 && (
-          <div className="empty-state">No checklist submissions yet.</div>
+          <div className="px-4 py-10 text-sm text-text-muted text-center">No checklist submissions yet.</div>
         )}
         {withUrls.map((s) => (
-          <div key={s.id} className="table-row grid-cols-4 text-sm">
+          <div key={s.id} className="grid grid-cols-4 px-4 py-4 border-b border-border last:border-b-0 items-center text-sm">
             <div>
               <div className="font-semibold">{s.worker_name}</div>
               <div className="text-xs text-text-muted">{s.company}</div>

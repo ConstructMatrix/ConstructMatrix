@@ -14,16 +14,16 @@ export default async function TeamPage() {
       <PageHeader title="Team" subtitle="Manage user roles and access levels." />
 
       <div className="card overflow-hidden">
-        <div className="table-header grid-cols-3">
+        <div className="grid grid-cols-3 px-4 py-3 bg-surface-1 border-b border-border text-xs font-medium text-text-muted uppercase tracking-wide">
           <span>User</span>
           <span>Current role</span>
           <span>Change role</span>
         </div>
         {(users || []).length === 0 && (
-          <div className="empty-state">No users yet.</div>
+          <div className="px-4 py-10 text-sm text-text-muted text-center">No users yet.</div>
         )}
         {(users || []).map((u) => (
-          <div key={u.id} className="table-row grid-cols-3">
+          <div key={u.id} className="grid grid-cols-3 px-4 py-4 border-b border-border last:border-b-0 items-center">
             <div>
               <div className="text-sm font-semibold">{u.full_name || u.email}</div>
               <div className="text-xs text-text-muted mt-0.5">{u.email}</div>
@@ -40,7 +40,7 @@ export default async function TeamPage() {
                   className="select flex-1 text-sm"
                 >
                   <option value="admin">Admin</option>
-                  <option value="manager">Manager</option>
+                  <option value="manager">Onboarding Manager</option>
                   <option value="contractor">Contractor</option>
                 </select>
                 <button className="btn text-sm">Save</button>
