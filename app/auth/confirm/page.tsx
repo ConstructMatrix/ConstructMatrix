@@ -4,12 +4,11 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export default function AuthCallbackPage() {
+export default function AuthConfirmPage() {
   const router = useRouter();
 
   useEffect(() => {
     const supabase = createClient();
-    
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         const params = new URLSearchParams(window.location.search);

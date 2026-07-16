@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   if (!email) return NextResponse.json({ error: "Email required" }, { status: 400 });
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://atconstructmatrix.com";
-  const callbackUrl = `${appUrl}/auth/callback?redirect=%2Fadmin`;
+  const callbackUrl = `${appUrl}/auth/confirm?redirect=%2Fadmin`;
 
   const supabase = createServiceRoleClient();
   const { data, error } = await supabase.auth.admin.generateLink({

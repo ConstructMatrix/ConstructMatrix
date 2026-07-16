@@ -2,9 +2,14 @@ import { NextResponse } from "next/server";
 import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
-  const { searchParams, origin, hash } = new URL(request.url);
+  const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const redirectTo = searchParams.get("redirect") || "/onboarding";
+  const redirectTo = searchParams.get("redirect") || "/admin";
+  const errorParam = searchParams.get("error");
+
+  if (errorParam) {
+    return NextResponse.redirect(`${origin}/login?error=link_expired`);
+  }
 
   if (!code) {
     return NextResponse.redirect(`${origin}/login?error=link_expired`);
