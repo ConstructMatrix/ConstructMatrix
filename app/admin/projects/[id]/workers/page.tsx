@@ -46,7 +46,7 @@ export default async function WorkersPage({ params }: { params: { id: string } }
       </div>
 
       <div className="card overflow-hidden">
-        <div className="table-header">
+        <div className="cm-table-header">
           <span>Worker</span>
           <span>Type</span>
           <span>Status</span>
@@ -56,7 +56,7 @@ export default async function WorkersPage({ params }: { params: { id: string } }
           <div className="empty-state">No workers added yet. Use the form above to invite your first worker.</div>
         )}
         {(members || []).map((m: any) => (
-          <div key={m.user_id} className="table-row">
+          <div key={m.user_id} className="cm-table-row">
             <div>
               <div className="text-sm font-semibold">{m.users?.full_name || m.users?.email}</div>
               <div className="text-xs text-text-muted">{m.users?.email}</div>
@@ -69,4 +69,4 @@ export default async function WorkersPage({ params }: { params: { id: string } }
       </div>
     </div>
   );
-}
+} 

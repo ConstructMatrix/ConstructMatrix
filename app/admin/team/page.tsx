@@ -10,7 +10,7 @@ export default async function TeamPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <div className="p-6 max-w-4xl">
+    <div className="p-6 ">
       <PageHeader title="Team" subtitle="Manage user roles and access levels." />
 
       <div className="card overflow-hidden">
