@@ -10,6 +10,38 @@ function statusFor(doc: EmployeeDocument | undefined): Status {
   return doc.confirmed_at ? "verified" : "pending";
 }
 
+async function compressImage(file: File, maxDimension = 1600, quality = 0.7): Promise<string> {
+  const img = document.createElement("img");
+  const reader = new FileReader();
+
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+  await new Promise((resolve, reject) => {
+    img.onload = resolve;
+    img.onerror = reject;
+    img.src = dataUrl;
+  });
+
+  const canvas = document.createElement("canvas");
+  let { width, height } = img;
+  if (width > height && width > maxDimension) {
+    height = (height * maxDimension) / width;
+    width = maxDimension;
+  } else if (height > maxDimension) {
+    width = (width * maxDimension) / height;
+    height = maxDimension;
+  }
+  canvas.width = width;
+  canvas.height = height;
+  canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+
+  return canvas.toDataURL("image/jpeg", quality);
+}
+
 export default function DocumentsList({
   projectId,
   docConfigs,
@@ -22,15 +54,20 @@ export default function DocumentsList({
   const [docs, setDocs] = useState(initialDocs);
   const [uploading, setUploading] = useState<string | null>(null);
   const [toast, setToast] = useState(false);
+  const [errorToast, setErrorToast] = useState<string | null>(null);
   const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const latestDocFor = (type: string) => docs.find((d) => d.document_type === type);
 
+  function showError(message: string) {
+    setErrorToast(message);
+    setTimeout(() => setErrorToast(null), 5000);
+  }
+
   async function handleFile(config: ProjectDocumentConfig, file: File) {
     setUploading(config.document_type);
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const imageDataUrl = reader.result as string;
+    try {
+      const imageDataUrl = await compressImage(file);
       const res = await fetch("/api/scan-document", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -41,15 +78,28 @@ export default function DocumentsList({
           isMandatory: config.is_mandatory,
         }),
       });
-      const json = await res.json();
-      setUploading(null);
-      if (res.ok) {
-        setDocs((prev) => [json.document, ...prev]);
-        setToast(true);
-        setTimeout(() => setToast(false), 4000);
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Upload failed:", res.status, text);
+        showError(
+          res.status === 413
+            ? "That image is too large. Try again — it should compress automatically now."
+            : "Upload failed. Please try again."
+        );
+        return;
       }
-    };
-    reader.readAsDataURL(file);
+
+      const json = await res.json();
+      setDocs((prev) => [json.document, ...prev]);
+      setToast(true);
+      setTimeout(() => setToast(false), 4000);
+    } catch (err) {
+      console.error("Upload error:", err);
+      showError("Upload failed. Please check your connection and try again.");
+    } finally {
+      setUploading(null);
+    }
   }
 
   const mandatory = docConfigs.filter((c) => c.is_mandatory);
@@ -133,6 +183,11 @@ export default function DocumentsList({
       {toast && (
         <div className="toast mb-4 flex items-center gap-2">
           <span>✓ Document uploaded. Your supervisor has been notified to review it.</span>
+        </div>
+      )}
+      {errorToast && (
+        <div className="alert alert-danger mb-4 flex items-center gap-2">
+          <span>{errorToast}</span>
         </div>
       )}
       {mandatory.length > 0 && (
