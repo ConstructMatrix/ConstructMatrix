@@ -98,7 +98,7 @@ export default async function AdminDashboardPage({
       <FilterBar projects={projects || []} />
 
       <div className="card overflow-hidden">
-        <div className="table-header grid-cols-4">
+        <div className="table-header">
           <span>Employee</span>
           <span>Type</span>
           <span>Documents</span>
@@ -111,7 +111,7 @@ export default async function AdminDashboardPage({
           <Link
             key={`${m.project_id}-${m.user_id}`}
             href={`/admin/employees/${m.user_id}?project=${m.project_id}`}
-            className="table-row table-row-hover grid-cols-4"
+            className="table-row table-row-hover"
           >
             <div className="flex items-center gap-3">
               <div className="avatar">
