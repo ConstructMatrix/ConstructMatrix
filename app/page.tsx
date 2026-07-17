@@ -10,8 +10,8 @@ export default function HomePage() {
         </div>
       </header>
 
-      <div className="flex-1 flex items-center justify-center px-6 py-16">
-        <div className="max-w-lg w-full text-center">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-16">
+        <div className="max-w-lg w-full text-center mb-14">
           <div className="inline-flex items-center gap-2 bg-brand-light text-brand text-xs font-semibold px-3 py-1.5 rounded-full mb-6 border border-brand-muted">
             Construction site onboarding
           </div>
@@ -23,7 +23,7 @@ export default function HomePage() {
             Track credentials, manage checklists, and verify compliance — all from one platform built for construction teams.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-14">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/login" className="btn btn-primary px-6 py-3 text-sm">
               Admin / site manager sign in
             </Link>
@@ -31,12 +31,12 @@ export default function HomePage() {
               Employee demo QR sign-in
             </Link>
           </div>
+        </div>
 
-          <div className="grid sm:grid-cols-3 gap-4 text-left">
-            <FeatureCard icon="📋" title="Site checklists" description="Digital orientation forms with supervisor sign-off" />
-            <FeatureCard icon="📄" title="Credential tracking" description="Upload and verify licenses, certs, and IDs" />
-            <FeatureCard icon="📱" title="QR onboarding" description="Workers scan on-site — no app download needed" />
-          </div>
+        <div className="max-w-4xl w-full grid sm:grid-cols-3 gap-4 text-left">
+          <FeatureCard icon="📋" title="Site checklists" description="Digital orientation forms with supervisor sign-off" />
+          <FeatureCard icon="📄" title="Credential tracking" description="Upload and verify licenses, certs, and IDs" />
+          <FeatureCard icon="📱" title="QR onboarding" description="Workers scan on-site — no app download needed" />
         </div>
       </div>
 
