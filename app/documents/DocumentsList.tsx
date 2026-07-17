@@ -42,6 +42,25 @@ async function compressImage(file: File, maxDimension = 1600, quality = 0.7): Pr
   return canvas.toDataURL("image/jpeg", quality);
 }
 
+async function pdfFirstPageToDataUrl(file: File): Promise<string> {
+  const pdfjsLib = await import("pdfjs-dist");
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const page = await pdf.getPage(1);
+  const viewport = page.getViewport({ scale: 2 });
+
+  const canvas = document.createElement("canvas");
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  const ctx = canvas.getContext("2d")!;
+
+  await page.render({ canvas, canvasContext: ctx, viewport }).promise;
+
+  return canvas.toDataURL("image/jpeg", 0.8);
+}
+
 export default function DocumentsList({
   projectId,
   docConfigs,
@@ -67,7 +86,11 @@ export default function DocumentsList({
   async function handleFile(config: ProjectDocumentConfig, file: File) {
     setUploading(config.document_type);
     try {
-      const imageDataUrl = await compressImage(file);
+      const imageDataUrl =
+        file.type === "application/pdf"
+          ? await pdfFirstPageToDataUrl(file)
+          : await compressImage(file);
+
       const res = await fetch("/api/scan-document", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -84,7 +107,7 @@ export default function DocumentsList({
         console.error("Upload failed:", res.status, text);
         showError(
           res.status === 413
-            ? "That image is too large. Try again — it should compress automatically now."
+            ? "That file is too large. Please try again."
             : "Upload failed. Please try again."
         );
         return;
@@ -155,8 +178,7 @@ export default function DocumentsList({
           <>
             <input
               type="file"
-              accept="image/*"
-              capture="environment"
+              accept="image/*,application/pdf"
               className="hidden"
               ref={(el) => { fileInputs.current[config.document_type] = el; }}
               onChange={(e) => {
