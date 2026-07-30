@@ -8,18 +8,26 @@ import type { ChecklistResponseValue, ChecklistSectionConfig } from "@/lib/types
 import { validateChecklistResponses } from "@/lib/validation";
 import { submitChecklist } from "./actions";
 
+interface CompanyOption {
+  id: string;
+  name: string;
+  trades: { id: string; trade_name: string }[];
+}
+
 export default function ChecklistForm({
   project,
   sections,
+  companies,
   profile,
 }: {
   project: { id: string; name: string; slug: string };
   sections: ChecklistSectionConfig[];
-  profile: { fullName: string; company: string; unionTrade: string };
+  companies: CompanyOption[];
+  profile: { fullName: string; companyId: string; trade: string };
 }) {
   const [workerName, setWorkerName] = useState(profile.fullName);
-  const [company, setCompany] = useState(profile.company);
-  const [unionTrade, setUnionTrade] = useState(profile.unionTrade);
+  const [companyId, setCompanyId] = useState(profile.companyId);
+  const [trade, setTrade] = useState(profile.trade);
   const [employeeType, setEmployeeType] = useState("");
   const [responses, setResponses] = useState<Record<string, ChecklistResponseValue>>({});
   const [errors, setErrors] = useState<string[]>([]);
@@ -27,6 +35,8 @@ export default function ChecklistForm({
   const [submitted, setSubmitted] = useState(false);
   const [hasSignature, setHasSignature] = useState(false);
   const sigRef = useRef<SignatureCanvas>(null);
+
+  const selectedCompany = companies.find((c) => c.id === companyId);
 
   function setResponse(sectionId: string, itemIndex: number, value: ChecklistResponseValue) {
     setResponses((prev) => ({ ...prev, [`${sectionId}:${itemIndex}`]: value }));
@@ -39,6 +49,7 @@ export default function ChecklistForm({
 
   async function handleSubmit() {
     const clientErrors = validateChecklistResponses(sections, responses).map((e) => e.message);
+    if (!companyId) clientErrors.push("Please select your company.");
     if (!hasSignature || sigRef.current?.isEmpty()) {
       clientErrors.push("A signature is required before submitting.");
     }
@@ -54,8 +65,8 @@ export default function ChecklistForm({
     const result = await submitChecklist({
       projectId: project.id,
       workerName,
-      company,
-      unionTrade,
+      companyId,
+      trade,
       employeeType,
       responses,
       signatureDataUrl,
@@ -98,8 +109,47 @@ export default function ChecklistForm({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 card p-5 mb-5">
           <Field label="Worker's name" value={workerName} onChange={setWorkerName} />
-          <Field label="Company" value={company} onChange={setCompany} />
-          <Field label="Union / trade" value={unionTrade} onChange={setUnionTrade} />
+
+          <div>
+            <label className="label">Company</label>
+            <select
+              value={companyId}
+              onChange={(e) => {
+                setCompanyId(e.target.value);
+                setTrade(""); // reset trade when company changes
+              }}
+              className="select w-full"
+            >
+              <option value="">Select company...</option>
+              {companies.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="label">Union / trade</label>
+            <select
+              value={trade}
+              onChange={(e) => setTrade(e.target.value)}
+              className="select w-full"
+              disabled={!selectedCompany || selectedCompany.trades.length === 0}
+            >
+              <option value="">
+                {selectedCompany && selectedCompany.trades.length === 0
+                  ? "No trades listed for this company"
+                  : "Select trade..."}
+              </option>
+              {selectedCompany?.trades.map((t) => (
+                <option key={t.id} value={t.trade_name}>
+                  {t.trade_name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div>
             <label className="label">Worker type</label>
             <select

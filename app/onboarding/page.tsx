@@ -19,7 +19,6 @@ export default async function OnboardingPage({
 
   const { data: profile } = await supabase.from("users").select("*").eq("id", user!.id).single();
 
-  // Fall back to the most recent project this worker joined if none was passed in the URL.
   let projectSlug = searchParams.project;
   if (!projectSlug) {
     const { data: membership } = await supabase
@@ -59,7 +58,6 @@ export default async function OnboardingPage({
     );
   }
 
-  // Ensure a project_members row exists for this worker (first visit via QR).
   await supabase
     .from("project_members")
     .upsert({ project_id: project.id, user_id: user!.id, status: "pending" }, { onConflict: "project_id,user_id", ignoreDuplicates: true });
@@ -70,14 +68,26 @@ export default async function OnboardingPage({
     .eq("project_id", project.id)
     .order("section_order", { ascending: true });
 
+  const { data: companiesData } = await supabase
+    .from("companies")
+    .select("id, name, company_trades(id, trade_name)")
+    .order("name");
+
+  const companies = (companiesData || []).map((c: any) => ({
+    id: c.id,
+    name: c.name,
+    trades: c.company_trades || [],
+  }));
+
   return (
     <ChecklistForm
       project={project}
       sections={(sections || []) as ChecklistSectionConfig[]}
+      companies={companies}
       profile={{
         fullName: profile?.full_name || "",
-        company: profile?.company || "",
-        unionTrade: "",
+        companyId: profile?.company_id || "",
+        trade: profile?.trade || "",
       }}
     />
   );

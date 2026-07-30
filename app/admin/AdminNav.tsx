@@ -8,6 +8,7 @@ import SignOutButton from "./SignOutButton";
 const LINKS = [
   { href: "/admin", label: "Dashboard", match: (p: string) => p === "/admin" },
   { href: "/admin/projects", label: "Projects", match: (p: string) => p.startsWith("/admin/projects") },
+  { href: "/admin/companies", label: "Companies", match: (p: string) => p.startsWith("/admin/companies") },
   { href: "/admin/history", label: "History", match: (p: string) => p.startsWith("/admin/history") },
   { href: "/admin/team", label: "Team", match: (p: string) => p.startsWith("/admin/team"), adminOnly: true },
 ];

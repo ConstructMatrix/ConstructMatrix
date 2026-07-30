@@ -9,9 +9,9 @@ import type { ChecklistResponseValue, ChecklistSectionConfig } from "@/lib/types
 export interface SubmitChecklistInput {
   projectId: string;
   workerName: string;
-  company: string;
-  unionTrade: string;
-   employeeType: string;
+  companyId: string;
+  trade: string;
+  employeeType: string;
   responses: Record<string, ChecklistResponseValue>;
   signatureDataUrl: string;
 }
@@ -29,13 +29,24 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
   } = await supabase.auth.getUser();
 
   if (!user) return { ok: false, error: "Not signed in." };
-  if (input.employeeType) {
-  await supabase
-    .from("users")
-    .update({ employee_type: input.employeeType })
-    .eq("id", user.id);
-   }
+
+  const profileUpdate: Record<string, any> = {};
+  if (input.employeeType) profileUpdate.employee_type = input.employeeType;
+  if (input.companyId) profileUpdate.company_id = input.companyId;
+  if (input.trade) profileUpdate.trade = input.trade;
+  if (Object.keys(profileUpdate).length > 0) {
+    await supabase.from("users").update(profileUpdate).eq("id", user.id);
+  }
+
   if (!input.signatureDataUrl) return { ok: false, error: "A signature is required before submitting." };
+  if (!input.companyId) return { ok: false, error: "Please select your company." };
+
+  const { data: company } = await supabase
+    .from("companies")
+    .select("name")
+    .eq("id", input.companyId)
+    .single();
+  const companyName = company?.name || "";
 
   const { data: project } = await supabase
     .from("projects")
@@ -51,7 +62,6 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
     .order("section_order", { ascending: true });
   const sections = (sectionsData || []) as ChecklistSectionConfig[];
 
-  // Server-side validation gate (SRS FR14/FR34) — never trust client-side checks alone.
   const errors = validateChecklistResponses(sections, input.responses);
   if (errors.length > 0) {
     return { ok: false, validationErrors: errors.map((e) => e.message) };
@@ -59,7 +69,6 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
 
   const submittedAt = new Date().toISOString();
 
-  // Upload signature PNG to Storage.
   const sigBase64 = input.signatureDataUrl.split(",")[1];
   const sigBuffer = Buffer.from(sigBase64, "base64");
   const sigPath = `${project.id}/${user.id}/signatures/${Date.now()}.png`;
@@ -68,14 +77,13 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
     upsert: true,
   });
 
-  // Render + store the PDF export (SRS FR17/FR18).
   let pdfUrl: string | null = null;
   try {
     const pdfBuffer = await renderChecklistPdf({
       projectName: project.name,
       workerName: input.workerName,
-      company: input.company,
-      unionTrade: input.unionTrade || null,
+      company: companyName,
+      unionTrade: input.trade || null,
       employeeType: input.employeeType || null,
       submittedAt,
       sections,
@@ -96,8 +104,8 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
     user_id: user.id,
     project_id: project.id,
     worker_name: input.workerName,
-    company: input.company,
-    union_trade: input.unionTrade || null,
+    company: companyName,
+    union_trade: input.trade || null,
     submitted_at: submittedAt,
     responses: input.responses,
     signature_url: sigPath,
@@ -105,7 +113,6 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
   });
   if (insertError) return { ok: false, error: insertError.message };
 
-  // Re-run the clearance engine (SRS 5.4).
   const { data: docConfigs } = await supabase
     .from("project_documents_config")
     .select("*")
@@ -136,34 +143,34 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
     metadata: { blocking_reasons: clearance.blockingReasons },
   });
 
-    const { data: managers } = await supabase
-      .from("project_members")
-      .select("users(email, role)")
-      .eq("project_id", project.id)
-      .in("users.role", ["admin", "manager"]);
+  const { data: managers } = await supabase
+    .from("project_members")
+    .select("users(email, role)")
+    .eq("project_id", project.id)
+    .in("users.role", ["admin", "manager"]);
 
-    const { data: admin } = await supabase
-      .from("users")
-      .select("email")
-      .eq("id", project.admin_id)
-      .single();
+  const { data: admin } = await supabase
+    .from("users")
+    .select("email")
+    .eq("id", project.admin_id)
+    .single();
 
-    const emailsToNotify = new Set<string>();
-    if (admin?.email) emailsToNotify.add(admin.email);
-    (managers || []).forEach((m: any) => {
-      if (m.users?.email) emailsToNotify.add(m.users.email);
-    });
+  const emailsToNotify = new Set<string>();
+  if (admin?.email) emailsToNotify.add(admin.email);
+  (managers || []).forEach((m: any) => {
+    if (m.users?.email) emailsToNotify.add(m.users.email);
+  });
 
-    for (const email of emailsToNotify) {
-      try {
-        await sendChecklistSubmittedNotice({
-          to: email,
-          workerName: input.workerName,
-          projectName: project.name,
-        });
-      } catch (err) {
-        console.error("Failed to send notification email", err);
-      }
+  for (const email of emailsToNotify) {
+    try {
+      await sendChecklistSubmittedNotice({
+        to: email,
+        workerName: input.workerName,
+        projectName: project.name,
+      });
+    } catch (err) {
+      console.error("Failed to send notification email", err);
     }
+  }
   return { ok: true };
 }
