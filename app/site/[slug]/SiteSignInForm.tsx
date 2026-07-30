@@ -17,7 +17,7 @@ export default function SiteSignInForm({ projectSlug }: { projectSlug: string })
         const { error } = await supabase.auth.signInAnonymously();
         if (error) {
           console.error("Anonymous sign-in failed:", error);
-          setError("Couldn't start your session. Please try scanning the QR code again.");
+          setError(`[${error.status || "?"}] ${error.name}: ${error.message}`);
           return;
         }
       }
