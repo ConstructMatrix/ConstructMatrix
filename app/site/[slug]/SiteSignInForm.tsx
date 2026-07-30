@@ -1,63 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SiteSignInForm({ projectSlug }: { projectSlug: string }) {
-  const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    const supabase = createClient();
-    const redirectPath = `/onboarding?project=${projectSlug}`;
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `https://atconstructmatrix.com/auth/callback?redirect=${encodeURIComponent(redirectPath)}`,
-      },
-    });
-    setLoading(false);
-    if (error) {
-      setError(error.message || "Failed to send sign-in link. Please try again.");
-    } else {
-      setSent(true);
+  useEffect(() => {
+    async function signInAndRedirect() {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        const { error } = await supabase.auth.signInAnonymously();
+        if (error) {
+          console.error("Anonymous sign-in failed:", error);
+          setError("Couldn't start your session. Please try scanning the QR code again.");
+          return;
+        }
+      }
+      router.push(`/onboarding?project=${projectSlug}`);
     }
-  }
+    signInAndRedirect();
+  }, [projectSlug, router]);
 
-  if (sent) {
+  if (error) {
     return (
-      <div className="alert alert-success">
-        <p className="text-sm">
-          We sent a sign-in link to <strong>{email}</strong>. Open it on this device to continue.
-        </p>
+      <div className="alert alert-danger">
+        <p className="text-sm">{error}</p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <p className="text-sm text-text-muted">Enter your email to continue</p>
-      <input
-        type="email"
-        required
-        placeholder="name@company.com"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="input"
-      />
-      {error && (
-        <div className="alert alert-danger">
-          <p className="text-sm">{error}</p>
-        </div>
-      )}
-      <button type="submit" disabled={loading} className="btn btn-primary w-full">
-        {loading ? "Sending…" : "Continue"}
-      </button>
-    </form>
+    <div className="flex flex-col items-center gap-3 py-10">
+      <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+      <p className="text-sm text-text-muted">Starting your onboarding…</p>
+    </div>
   );
 }
