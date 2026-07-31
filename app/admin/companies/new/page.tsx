@@ -1,10 +1,20 @@
 import PageHeader from "@/components/PageHeader";
 import { createCompany } from "../actions";
 
-export default function NewCompanyPage() {
+export default function NewCompanyPage({
+  searchParams,
+}: {
+  searchParams: { error?: string };
+}) {
   return (
     <div className="p-6 max-w-2xl">
       <PageHeader title="New company" subtitle="Add a subcontractor or employer to the directory." />
+
+      {searchParams.error && (
+        <div className="alert alert-danger mb-4">
+          <p className="text-sm">{searchParams.error}</p>
+        </div>
+      )}
 
       <form action={createCompany} className="card p-5 flex flex-col gap-4">
         <div>

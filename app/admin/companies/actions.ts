@@ -11,26 +11,39 @@ export async function createCompany(formData: FormData) {
   const phone = formData.get("phone") as string;
   const tradesRaw = formData.get("trades") as string;
 
-  const { data: company, error } = await supabase
-    .from("companies")
-    .insert({ name, address: address || null, phone: phone || null })
-    .select()
-    .single();
+  let companyId: string;
 
-  if (error || !company) {
-    throw new Error(error?.message || "Failed to create company");
+  try {
+    const { data: company, error } = await supabase
+      .from("companies")
+      .insert({ name, address: address || null, phone: phone || null })
+      .select()
+      .single();
+
+    if (error || !company) {
+      redirect(`/admin/companies/new?error=${encodeURIComponent(error?.message || "Failed to create company")}`);
+    }
+
+    companyId = company!.id;
+
+    const trades = (tradesRaw || "")
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+
+    if (trades.length > 0) {
+      const { error: tradesError } = await supabase
+        .from("company_trades")
+        .insert(trades.map((trade_name) => ({ company_id: companyId, trade_name })));
+
+      if (tradesError) {
+        redirect(`/admin/companies/new?error=${encodeURIComponent("Company created, but trades failed: " + tradesError.message)}`);
+      }
+    }
+  } catch (err: any) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err; // let redirect() pass through
+    redirect(`/admin/companies/new?error=${encodeURIComponent(err?.message || "Unknown error")}`);
   }
 
-  const trades = (tradesRaw || "")
-    .split(",")
-    .map((t) => t.trim())
-    .filter(Boolean);
-
-  if (trades.length > 0) {
-    await supabase
-      .from("company_trades")
-      .insert(trades.map((trade_name) => ({ company_id: company.id, trade_name })));
-  }
-
-  redirect(`/admin/companies/${company.id}`);
+  redirect(`/admin/companies/${companyId}`);
 }
