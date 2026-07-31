@@ -6,7 +6,13 @@ import PageHeader from "@/components/PageHeader";
 import FilterBar from "./FilterBar";
 import type { ProjectStatus } from "@/lib/types";
 
-function initials(name: string | null) {
+function displayName(u: { first_name?: string | null; last_name?: string | null; full_name?: string | null; email?: string | null }) {
+  const combined = [u?.first_name, u?.last_name].filter(Boolean).join(" ");
+  return combined || u?.full_name || u?.email || "—";
+}
+
+function initials(u: { first_name?: string | null; last_name?: string | null; full_name?: string | null }) {
+  const name = [u?.first_name, u?.last_name].filter(Boolean).join(" ") || u?.full_name;
   if (!name) return "?";
   return name
     .split(" ")
@@ -30,7 +36,7 @@ export default async function AdminDashboardPage({
   if (projectIds.length > 0) {
     const { data } = await supabase
       .from("project_members")
-      .select("project_id, user_id, status, users(*), projects(name)")
+      .select("project_id, user_id, status, users(id, email, full_name, first_name, last_name, position, employee_type), projects(name)")
       .in("project_id", projectIds);
     members = data || [];
   }
@@ -115,10 +121,10 @@ export default async function AdminDashboardPage({
           >
             <div className="flex items-center gap-3">
               <div className="avatar">
-                {initials(m.users?.full_name)}
+                {initials(m.users)}
               </div>
               <div>
-                <div className="text-sm font-semibold">{m.users?.full_name || m.users?.email}</div>
+                <div className="text-sm font-semibold">{displayName(m.users)}</div>
                 <div className="text-xs text-text-muted">{m.users?.position || "—"}</div>
               </div>
             </div>

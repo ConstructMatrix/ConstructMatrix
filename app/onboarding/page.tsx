@@ -85,7 +85,8 @@ export default async function OnboardingPage({
       sections={(sections || []) as ChecklistSectionConfig[]}
       companies={companies}
       profile={{
-        fullName: profile?.full_name || "",
+        firstName: profile?.first_name || "",
+        lastName: profile?.last_name || "",
         companyId: profile?.company_id || "",
         trade: profile?.trade || "",
       }}

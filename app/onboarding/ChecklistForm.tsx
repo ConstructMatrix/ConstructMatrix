@@ -23,9 +23,10 @@ export default function ChecklistForm({
   project: { id: string; name: string; slug: string };
   sections: ChecklistSectionConfig[];
   companies: CompanyOption[];
-  profile: { fullName: string; companyId: string; trade: string };
+  profile: { firstName: string; lastName: string; companyId: string; trade: string };
 }) {
-  const [workerName, setWorkerName] = useState(profile.fullName);
+  const [firstName, setFirstName] = useState(profile.firstName);
+  const [lastName, setLastName] = useState(profile.lastName);
   const [companyId, setCompanyId] = useState(profile.companyId);
   const [trade, setTrade] = useState(profile.trade);
   const [employeeType, setEmployeeType] = useState("");
@@ -64,7 +65,8 @@ export default function ChecklistForm({
 
     const result = await submitChecklist({
       projectId: project.id,
-      workerName,
+      firstName,
+      lastName,
       companyId,
       trade,
       employeeType,
@@ -108,7 +110,8 @@ export default function ChecklistForm({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 card p-5 mb-5">
-          <Field label="Worker's name" value={workerName} onChange={setWorkerName} />
+          <Field label="First name" value={firstName} onChange={setFirstName} />
+          <Field label="Last name" value={lastName} onChange={setLastName} />
 
           <div>
             <label className="label">Company</label>

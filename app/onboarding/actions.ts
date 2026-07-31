@@ -8,7 +8,8 @@ import type { ChecklistResponseValue, ChecklistSectionConfig } from "@/lib/types
 
 export interface SubmitChecklistInput {
   projectId: string;
-  workerName: string;
+  firstName: string;
+  lastName: string;
   companyId: string;
   trade: string;
   employeeType: string;
@@ -30,10 +31,14 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
 
   if (!user) return { ok: false, error: "Not signed in." };
 
+  const workerName = `${input.firstName} ${input.lastName}`.trim();
+
   const profileUpdate: Record<string, any> = {};
   if (input.employeeType) profileUpdate.employee_type = input.employeeType;
   if (input.companyId) profileUpdate.company_id = input.companyId;
   if (input.trade) profileUpdate.trade = input.trade;
+  if (input.firstName) profileUpdate.first_name = input.firstName;
+  if (input.lastName) profileUpdate.last_name = input.lastName;
   if (Object.keys(profileUpdate).length > 0) {
     await supabase.from("users").update(profileUpdate).eq("id", user.id);
   }
@@ -81,7 +86,7 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
   try {
     const pdfBuffer = await renderChecklistPdf({
       projectName: project.name,
-      workerName: input.workerName,
+      workerName,
       company: companyName,
       unionTrade: input.trade || null,
       employeeType: input.employeeType || null,
@@ -103,7 +108,7 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
   const { error: insertError } = await supabase.from("checklist_submissions").insert({
     user_id: user.id,
     project_id: project.id,
-    worker_name: input.workerName,
+    worker_name: workerName,
     company: companyName,
     union_trade: input.trade || null,
     submitted_at: submittedAt,
@@ -165,7 +170,7 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
     try {
       await sendChecklistSubmittedNotice({
         to: email,
-        workerName: input.workerName,
+        workerName,
         projectName: project.name,
       });
     } catch (err) {

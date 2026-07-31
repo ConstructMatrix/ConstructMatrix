@@ -8,7 +8,7 @@ export default function NewCompanyPage({
 }) {
   return (
     <div className="p-6 max-w-2xl">
-      <PageHeader title="New company" subtitle="Add a subcontractor or employer to the directory." />
+      <PageHeader title="New company" subtitle="Add new company to directory." />
 
       {searchParams.error && (
         <div className="alert alert-danger mb-4">
@@ -32,9 +32,6 @@ export default function NewCompanyPage({
         <div>
           <label className="label">Trades offered (comma-separated)</label>
           <input name="trades" placeholder="Electrical, Low Voltage, Fire Alarm" className="input" />
-          <p className="text-xs text-text-muted mt-1">
-            Workers from this company will pick one of these during onboarding.
-          </p>
         </div>
         <div className="flex justify-end">
           <button className="btn btn-primary">Create company</button>
