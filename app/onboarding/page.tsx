@@ -68,6 +68,12 @@ export default async function OnboardingPage({
     .eq("project_id", project.id)
     .order("section_order", { ascending: true });
 
+  const { data: docConfigs } = await supabase
+    .from("project_documents_config")
+    .select("*")
+    .eq("project_id", project.id)
+    .order("sort_order", { ascending: true });
+
   const { data: companiesData } = await supabase
     .from("companies")
     .select("id, name, company_trades(id, trade_name)")
@@ -83,6 +89,7 @@ export default async function OnboardingPage({
     <ChecklistForm
       project={project}
       sections={(sections || []) as ChecklistSectionConfig[]}
+      docConfigs={docConfigs || []}
       companies={companies}
       profile={{
         firstName: profile?.first_name || "",
