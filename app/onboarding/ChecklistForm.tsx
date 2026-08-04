@@ -6,7 +6,7 @@ import SignaturePad from "@/components/SignaturePad";
 import YesNoNA from "@/components/YesNoNA";
 import type { ChecklistResponseValue, ChecklistSectionConfig, ProjectDocumentConfig } from "@/lib/types";
 import { validateChecklistResponses } from "@/lib/validation";
-import { fileToImageDataUrl } from "@/lib/fileupload";
+import { fileToImageDataUrl } from "@/lib/fileUpload";
 import { submitChecklist } from "./actions";
 
 interface CompanyOption {
