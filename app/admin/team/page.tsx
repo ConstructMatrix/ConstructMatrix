@@ -2,11 +2,16 @@ import { createServiceRoleClient } from "@/lib/supabase/server";
 import PageHeader from "@/components/PageHeader";
 import { assignRole } from "./actions";
 
+function displayName(u: { first_name?: string | null; last_name?: string | null; full_name?: string | null; email?: string | null }) {
+  const combined = [u.first_name, u.last_name].filter(Boolean).join(" ");
+  return combined || u.full_name || u.email || "Anonymous worker";
+}
+
 export default async function TeamPage() {
   const supabase = createServiceRoleClient();
   const { data: users } = await supabase
     .from("users")
-    .select("id, email, full_name, role")
+    .select("id, email, full_name, first_name, last_name, role")
     .order("created_at", { ascending: false });
 
   return (
@@ -25,8 +30,8 @@ export default async function TeamPage() {
         {(users || []).map((u) => (
           <div key={u.id} className="grid grid-cols-3 px-4 py-4 border-b border-border last:border-b-0 items-center">
             <div>
-              <div className="text-sm font-semibold">{u.full_name || u.email}</div>
-              <div className="text-xs text-text-muted mt-0.5">{u.email}</div>
+              <div className="text-sm font-semibold">{displayName(u)}</div>
+              <div className="text-xs text-text-muted mt-0.5">{u.email || "No email (anonymous sign-in)"}</div>
             </div>
             <div className="text-sm capitalize">
               <span className="pill">{u.role || "—"}</span>

@@ -148,20 +148,23 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
     metadata: { blocking_reasons: clearance.blockingReasons },
   });
 
+  const documentsSubmitted = (employeeDocs || []).map((d) => d.document_type);
+
   const { data: managers } = await supabase
     .from("project_members")
     .select("users(email, role)")
     .eq("project_id", project.id)
     .in("users.role", ["admin", "manager"]);
 
-  const { data: admin } = await supabase
+  const { data: allAdmins } = await supabase
     .from("users")
     .select("email")
-    .eq("id", project.admin_id)
-    .single();
+    .eq("role", "admin");
 
   const emailsToNotify = new Set<string>();
-  if (admin?.email) emailsToNotify.add(admin.email);
+  (allAdmins || []).forEach((a: any) => {
+    if (a.email) emailsToNotify.add(a.email);
+  });
   (managers || []).forEach((m: any) => {
     if (m.users?.email) emailsToNotify.add(m.users.email);
   });
@@ -172,6 +175,7 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
         to: email,
         workerName,
         projectName: project.name,
+        documentsSubmitted,
       });
     } catch (err) {
       console.error("Failed to send notification email", err);

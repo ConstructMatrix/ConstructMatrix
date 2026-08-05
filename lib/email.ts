@@ -77,11 +77,16 @@ export async function sendChecklistSubmittedNotice(params: {
   to: string;
   workerName: string;
   projectName: string;
+  documentsSubmitted?: string[];
 }) {
+  const docsHtml = params.documentsSubmitted?.length
+    ? `<p>Documents submitted: <strong>${params.documentsSubmitted.join(", ")}</strong></p>`
+    : "";
+
   return resend().emails.send({
     from: FROM,
     to: params.to,
     subject: `${params.workerName} submitted their onboarding checklist — ${params.projectName}`,
-    html: `<p>${params.workerName} just completed and signed their onboarding checklist for <strong>${params.projectName}</strong>. Review it in the admin dashboard.</p>`,
+    html: `<p>${params.workerName} just completed and signed their onboarding checklist for <strong>${params.projectName}</strong>.</p>${docsHtml}<p>Review it in the admin dashboard.</p>`,
   });
 }
