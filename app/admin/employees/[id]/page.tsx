@@ -48,8 +48,13 @@ export default async function EmployeeDetailPage({
     if (!latestByType.has(doc.document_type)) latestByType.set(doc.document_type, doc);
   }
 
-  const pendingDoc = (employeeDocs || []).find((d) => !d.confirmed_at);
-  const pendingPhotoUrl = pendingDoc ? await signedUrl(supabase, "credential-photos", pendingDoc.photo_url) : null;
+  const pendingDocs = (employeeDocs || []).filter((d) => !d.confirmed_at);
+  const pendingDocsWithUrls = await Promise.all(
+    pendingDocs.map(async (doc) => ({
+      doc,
+      photoUrl: await signedUrl(supabase, "credential-photos", doc.photo_url),
+    })),
+  );
 
   const submissionDownloads = await Promise.all(
     (submissions || []).map(async (s) => ({
@@ -140,9 +145,17 @@ export default async function EmployeeDetailPage({
         </div>
 
         <div>
-          <div className="section-label">Latest upload — AI scan</div>
-          {pendingDoc ? (
-            <DocumentReviewCard doc={pendingDoc} photoUrl={pendingPhotoUrl} />
+          <div className="section-label">
+            {pendingDocsWithUrls.length > 0
+              ? `Awaiting review (${pendingDocsWithUrls.length})`
+              : "Awaiting review"}
+          </div>
+          {pendingDocsWithUrls.length > 0 ? (
+            <div className="flex flex-col gap-4">
+              {pendingDocsWithUrls.map(({ doc, photoUrl }) => (
+                <DocumentReviewCard key={doc.id} doc={doc} photoUrl={photoUrl} />
+              ))}
+            </div>
           ) : (
             <div className="card p-6 empty-state py-12">No documents awaiting review.</div>
           )}
