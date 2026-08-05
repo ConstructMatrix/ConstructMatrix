@@ -31,7 +31,7 @@ export default async function TeamPage() {
           <div key={u.id} className="grid grid-cols-3 px-4 py-4 border-b border-border last:border-b-0 items-center">
             <div>
               <div className="text-sm font-semibold">{displayName(u)}</div>
-              <div className="text-xs text-text-muted mt-0.5">{u.email || "No email (anonymous sign-in)"}</div>
+              <div className="text-xs text-text-muted mt-0.5">{u.email}</div>
             </div>
             <div className="text-sm capitalize">
               <span className="pill">{u.role || "—"}</span>
