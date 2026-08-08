@@ -11,8 +11,7 @@ export interface SubmitChecklistInput {
   firstName: string;
   lastName: string;
   companyId: string;
-  trade: string;
-  employeeType: string;
+  email: string;
   responses: Record<string, ChecklistResponseValue>;
   signatureDataUrl: string;
 }
@@ -33,18 +32,28 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
 
   const workerName = `${input.firstName} ${input.lastName}`.trim();
 
+  const { data: currentProfile } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const isStaffAccount = currentProfile?.role === "admin" || currentProfile?.role === "manager";
+
   const profileUpdate: Record<string, any> = {};
-  if (input.employeeType) profileUpdate.employee_type = input.employeeType;
-  if (input.companyId) profileUpdate.company_id = input.companyId;
-  if (input.trade) profileUpdate.trade = input.trade;
-  if (input.firstName) profileUpdate.first_name = input.firstName;
-  if (input.lastName) profileUpdate.last_name = input.lastName;
+  if (!isStaffAccount) {
+    if (input.companyId) profileUpdate.company_id = input.companyId;
+    if (input.firstName) profileUpdate.first_name = input.firstName;
+    if (input.lastName) profileUpdate.last_name = input.lastName;
+    if (input.email) profileUpdate.email = input.email;
+  }
   if (Object.keys(profileUpdate).length > 0) {
     await supabase.from("users").update(profileUpdate).eq("id", user.id);
   }
 
   if (!input.signatureDataUrl) return { ok: false, error: "A signature is required before submitting." };
   if (!input.companyId) return { ok: false, error: "Please select your company." };
+  if (!input.email.trim()) return { ok: false, error: "Please enter your email." };
 
   const { data: company } = await supabase
     .from("companies")
@@ -88,8 +97,8 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
       projectName: project.name,
       workerName,
       company: companyName,
-      unionTrade: input.trade || null,
-      employeeType: input.employeeType || null,
+      unionTrade: null,
+      employeeType: null,
       submittedAt,
       sections,
       responses: input.responses,
@@ -110,7 +119,7 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
     project_id: project.id,
     worker_name: workerName,
     company: companyName,
-    union_trade: input.trade || null,
+    union_trade: null,
     submitted_at: submittedAt,
     responses: input.responses,
     signature_url: sigPath,

@@ -12,7 +12,6 @@ import { submitChecklist } from "./actions";
 interface CompanyOption {
   id: string;
   name: string;
-  trades: { id: string; trade_name: string }[];
 }
 
 type DocStatus = "yes" | "no" | "na";
@@ -28,13 +27,12 @@ export default function ChecklistForm({
   sections: ChecklistSectionConfig[];
   docConfigs: ProjectDocumentConfig[];
   companies: CompanyOption[];
-  profile: { firstName: string; lastName: string; companyId: string; trade: string };
+  profile: { firstName: string; lastName: string; companyId: string; email: string };
 }) {
   const [firstName, setFirstName] = useState(profile.firstName);
   const [lastName, setLastName] = useState(profile.lastName);
   const [companyId, setCompanyId] = useState(profile.companyId);
-  const [trade, setTrade] = useState(profile.trade);
-  const [employeeType, setEmployeeType] = useState("");
+  const [email, setEmail] = useState(profile.email);
   const [responses, setResponses] = useState<Record<string, ChecklistResponseValue>>({});
   const [errors, setErrors] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -46,8 +44,6 @@ export default function ChecklistForm({
   const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
   const [docErrors, setDocErrors] = useState<Record<string, string>>({});
   const docFileInputs = useRef<Record<string, HTMLInputElement | null>>({});
-
-  const selectedCompany = companies.find((c) => c.id === companyId);
 
   function setResponse(sectionId: string, itemIndex: number, value: ChecklistResponseValue) {
     setResponses((prev) => ({ ...prev, [`${sectionId}:${itemIndex}`]: value }));
@@ -105,6 +101,7 @@ export default function ChecklistForm({
   async function handleSubmit() {
     const clientErrors = validateChecklistResponses(sections, responses).map((e) => e.message);
     if (!companyId) clientErrors.push("Please select your company.");
+    if (!email.trim()) clientErrors.push("Please enter your email.");
 
     for (const config of docConfigs) {
       if (config.is_mandatory && docStatus[config.document_type] !== "yes") {
@@ -129,8 +126,7 @@ export default function ChecklistForm({
       firstName,
       lastName,
       companyId,
-      trade,
-      employeeType,
+      email,
       responses,
       signatureDataUrl,
     });
@@ -173,14 +169,7 @@ export default function ChecklistForm({
 
           <div>
             <label className="label">Company</label>
-            <select
-              value={companyId}
-              onChange={(e) => {
-                setCompanyId(e.target.value);
-                setTrade("");
-              }}
-              className="select w-full"
-            >
+            <select value={companyId} onChange={(e) => setCompanyId(e.target.value)} className="select w-full">
               <option value="">Select company...</option>
               {companies.map((c) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
@@ -189,33 +178,17 @@ export default function ChecklistForm({
           </div>
 
           <div>
-            <label className="label">Union / trade</label>
-            <select
-              value={trade}
-              onChange={(e) => setTrade(e.target.value)}
-              className="select w-full"
-              disabled={!selectedCompany || selectedCompany.trades.length === 0}
-            >
-              <option value="">
-                {selectedCompany && selectedCompany.trades.length === 0 ? "No trades listed" : "Select trade..."}
-              </option>
-              {selectedCompany?.trades.map((t) => (
-                <option key={t.id} value={t.trade_name}>{t.trade_name}</option>
-              ))}
-            </select>
+            <label className="label">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="input"
+            />
+            <p className="text-xs text-text-muted mt-1">For notifications only — not verified.</p>
           </div>
 
-          <div>
-            <label className="label">Worker type</label>
-            <select value={employeeType} onChange={(e) => setEmployeeType(e.target.value)} className="select w-full">
-              <option value="">Select type...</option>
-              <option value="contractor">Contractor</option>
-              <option value="subcontractor">Subcontractor</option>
-              <option value="consultant">Consultant</option>
-              <option value="owner">Owner</option>
-              <option value="employee">Employee</option>
-            </select>
-          </div>
           <Field label="Date" value={new Date().toLocaleDateString()} onChange={() => {}} readOnly />
         </div>
 

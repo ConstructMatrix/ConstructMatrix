@@ -74,16 +74,12 @@ export default async function OnboardingPage({
     .eq("project_id", project.id)
     .order("sort_order", { ascending: true });
 
-  const { data: companiesData } = await supabase
+ const { data: companiesData } = await supabase
     .from("companies")
-    .select("id, name, company_trades(id, trade_name)")
+    .select("id, name")
     .order("name");
 
-  const companies = (companiesData || []).map((c: any) => ({
-    id: c.id,
-    name: c.name,
-    trades: c.company_trades || [],
-  }));
+  const companies = companiesData || [];
 
   return (
     <ChecklistForm
@@ -95,7 +91,7 @@ export default async function OnboardingPage({
         firstName: profile?.first_name || "",
         lastName: profile?.last_name || "",
         companyId: profile?.company_id || "",
-        trade: profile?.trade || "",
+        email: profile?.email || "",
       }}
     />
   );
