@@ -4,6 +4,12 @@ import { computeClearance } from "@/lib/validation";
 import { signedUrl } from "@/lib/storage";
 import StatusPill from "@/components/StatusPill";
 import DocumentReviewCard from "./DocumentReviewCard";
+import { assignTradeAndRole } from "./actions";
+
+function displayName(u: { first_name?: string | null; last_name?: string | null; full_name?: string | null; email?: string | null }) {
+  const combined = [u.first_name, u.last_name].filter(Boolean).join(" ");
+  return combined || u.full_name || u.email || "Anonymous worker";
+}
 
 export default async function EmployeeDetailPage({
   params,
@@ -37,6 +43,14 @@ export default async function EmployeeDetailPage({
     .eq("user_id", employee.id)
     .order("submitted_at", { ascending: false });
 
+  const { data: companyHistory } = await supabase
+    .from("employee_companies")
+    .select("*, companies(id, name, company_trades(id, trade_name)), projects(id, name)")
+    .eq("user_id", employee.id)
+    .order("started_at", { ascending: false });
+
+  const currentAssignment = (companyHistory || []).find((h: any) => h.project_id === project.id);
+
   const clearance = computeClearance({
     documentConfigs: docConfigs || [],
     employeeDocuments: employeeDocs || [],
@@ -66,10 +80,10 @@ export default async function EmployeeDetailPage({
   return (
     <div className="p-6">
       <div className="page-header">
-        <h1 className="page-title">{employee.full_name || employee.email}</h1>
+        <h1 className="page-title">{displayName(employee)}</h1>
         <div className="flex flex-wrap items-center gap-2 mt-2">
           <span className="text-sm text-text-muted">
-            {employee.position || "—"} · <span className="capitalize">{employee.employee_type || "—"}</span> · {project.name}
+            {employee.email || "No email"} · {project.name}
           </span>
           <StatusPill status={clearance.status} />
         </div>
@@ -80,6 +94,67 @@ export default async function EmployeeDetailPage({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
+          {currentAssignment && (
+            <>
+              <div className="section-label">Assign trade and worker type</div>
+              <form action={assignTradeAndRole} className="card p-5 mb-6 flex flex-col gap-3">
+                <input type="hidden" name="employeeCompanyId" value={currentAssignment.id} />
+                <input type="hidden" name="employeeId" value={employee.id} />
+                <input type="hidden" name="projectId" value={project.id} />
+                <div className="text-xs text-text-muted mb-1">
+                  For <strong>{currentAssignment.companies?.name}</strong> on this project
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="label">Trade</label>
+                    <select name="trade" defaultValue={currentAssignment.trade || ""} className="select w-full">
+                      <option value="">Select trade...</option>
+                      {(currentAssignment.companies?.company_trades || []).map((t: any) => (
+                        <option key={t.id} value={t.trade_name}>{t.trade_name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="label">Worker type</label>
+                    <select name="employeeType" defaultValue={currentAssignment.employee_type || ""} className="select w-full">
+                      <option value="">Select type...</option>
+                      <option value="contractor">Contractor</option>
+                      <option value="subcontractor">Subcontractor</option>
+                      <option value="consultant">Consultant</option>
+                      <option value="owner">Owner</option>
+                      <option value="employee">Employee</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <button className="btn btn-primary text-sm">Save</button>
+                </div>
+              </form>
+            </>
+          )}
+
+          <div className="section-label">Company history</div>
+          <div className="card overflow-hidden mb-6">
+            {(companyHistory || []).length === 0 && (
+              <div className="empty-state py-6">No company history yet.</div>
+            )}
+            {(companyHistory || []).map((h: any) => (
+              <div key={h.id} className="flex items-center gap-3 px-5 py-3.5 border-b border-border last:border-b-0">
+                <div className="flex-1">
+                  <div className="text-sm font-semibold">{h.companies?.name || "—"}</div>
+                  <div className="text-xs text-text-muted">
+                    {h.projects?.name || "—"}
+                    {h.trade ? ` · ${h.trade}` : ""}
+                    {h.employee_type ? ` · ${h.employee_type}` : ""}
+                  </div>
+                </div>
+                <div className="text-xs text-text-muted">
+                  {new Date(h.started_at).toLocaleDateString()}
+                </div>
+              </div>
+            ))}
+          </div>
+
           <div className="section-label">Documents uploaded</div>
           <div className="card overflow-hidden mb-4">
             {(docConfigs || []).map((config) => {

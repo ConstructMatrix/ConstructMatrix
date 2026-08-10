@@ -42,7 +42,6 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
 
   const profileUpdate: Record<string, any> = {};
   if (!isStaffAccount) {
-    if (input.companyId) profileUpdate.company_id = input.companyId;
     if (input.firstName) profileUpdate.first_name = input.firstName;
     if (input.lastName) profileUpdate.last_name = input.lastName;
     if (input.email) profileUpdate.email = input.email;
@@ -68,6 +67,13 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
     .eq("id", input.projectId)
     .single();
   if (!project) return { ok: false, error: "Project not found." };
+
+  if (!isStaffAccount) {
+    await supabase.from("employee_companies").upsert(
+      { user_id: user.id, company_id: input.companyId, project_id: project.id },
+      { onConflict: "user_id,company_id,project_id", ignoreDuplicates: true },
+    );
+  }
 
   const { data: sectionsData } = await supabase
     .from("project_checklist_config")
