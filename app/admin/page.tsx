@@ -125,7 +125,7 @@ export default async function AdminDashboardPage({
               </div>
               <div>
                 <div className="text-sm font-semibold">{displayName(m.users)}</div>
-                <div className="text-xs text-text-muted">{m.users?.position || "—"}</div>
+                <div className="text-xs text-text-muted">{m.users?.email || m.users?.position || "—"}</div>
               </div>
             </div>
             <div className="text-sm text-text-muted capitalize">{m.users?.employee_type || "—"}</div>

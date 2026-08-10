@@ -4,6 +4,11 @@ import PageHeader from "@/components/PageHeader";
 import ProjectTabs from "../../../ProjectTabs";
 import { addWorker } from "./actions";
 
+function displayName(u: { first_name?: string | null; last_name?: string | null; full_name?: string | null; email?: string | null }) {
+  const combined = [u?.first_name, u?.last_name].filter(Boolean).join(" ");
+  return combined || u?.full_name || u?.email || "—";
+}
+
 export default async function WorkersPage({ params }: { params: { id: string } }) {
   const supabase = createServiceRoleClient();
   const { data: project } = await supabase.from("projects").select("*").eq("id", params.id).single();
@@ -11,13 +16,16 @@ export default async function WorkersPage({ params }: { params: { id: string } }
 
   const { data: members } = await supabase
     .from("project_members")
-    .select("*, users(id, email, full_name, employee_type, role)")
+    .select("*, users(id, email, full_name, first_name, last_name, employee_type, role)")
     .eq("project_id", project.id)
     .order("joined_at", { ascending: false });
 
   return (
     <div className="p-6">
-      <PageHeader title={project.name} subtitle={project.address || undefined} />
+      <PageHeader
+        title={`${project.name} — Roster`}
+        subtitle={project.description || project.address || undefined}
+      />
       <ProjectTabs projectId={project.id} active="workers" />
 
       <div className="card mb-5 overflow-hidden">
@@ -58,8 +66,8 @@ export default async function WorkersPage({ params }: { params: { id: string } }
         {(members || []).map((m: any) => (
           <div key={m.user_id} className="cm-table-row">
             <div>
-              <div className="text-sm font-semibold">{m.users?.full_name || m.users?.email}</div>
-              <div className="text-xs text-text-muted">{m.users?.email}</div>
+              <div className="text-sm font-semibold">{displayName(m.users)}</div>
+              <div className="text-xs text-text-muted">{m.users?.email || "—"}</div>
             </div>
             <div className="text-sm text-text-muted capitalize">{m.users?.employee_type || "—"}</div>
             <div className="text-sm capitalize">{m.status}</div>
@@ -69,4 +77,4 @@ export default async function WorkersPage({ params }: { params: { id: string } }
       </div>
     </div>
   );
-} 
+}
