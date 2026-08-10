@@ -25,15 +25,16 @@ function cell(text: string, width: number) {
 export async function renderChecklistDocx(
   props: ChecklistPdfProps & { signatureBuffer?: Buffer },
 ): Promise<Buffer> {
-  const { projectName, workerName, company, submittedAt, sections, responses } = props;
+  const { projectName, workerName, company, email, submittedAt, sections, responses } = props;
 
-  const children: (Paragraph | Table)[] = [
-    new Paragraph({ text: "Construction Site Checklist", heading: HeadingLevel.HEADING_1 }),
-    new Paragraph({ text: `${projectName} — Submitted ${new Date(submittedAt).toLocaleString()}` }),
-    new Paragraph({ text: `Worker's Name: ${workerName}` }),
-    new Paragraph({ text: `Company: ${company}` }),
-    new Paragraph({ text: "" }),
-  ];
+const children: (Paragraph | Table)[] = [
+  new Paragraph({ text: "Construction Site Checklist", heading: HeadingLevel.HEADING_1 }),
+  new Paragraph({ text: `${projectName} — Submitted ${new Date(submittedAt).toLocaleString()}` }),
+  new Paragraph({ text: `Worker's Name: ${workerName}` }),
+  new Paragraph({ text: `Company: ${company}` }),
+  new Paragraph({ text: `Email: ${email || "—"}` }),
+  new Paragraph({ text: "" }),
+];
 
   for (const section of sections as ChecklistSectionConfig[]) {
     children.push(new Paragraph({ text: section.section_name, heading: HeadingLevel.HEADING_2 }));

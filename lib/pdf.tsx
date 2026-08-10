@@ -25,6 +25,7 @@ export interface ChecklistPdfProps {
   projectName: string;
   workerName: string;
   company: string;
+  email: string;
   submittedAt: string;
   sections: ChecklistSectionConfig[];
   responses: Record<string, ChecklistResponseValue>;
@@ -32,7 +33,7 @@ export interface ChecklistPdfProps {
 }
 
 function ChecklistPdfDocument(props: ChecklistPdfProps) {
-  const { projectName, workerName, company, submittedAt, sections, responses, signatureDataUrl } = props;
+  const { projectName, workerName, company, email, submittedAt, sections, responses, signatureDataUrl } = props;
   return (
     <Document>
       <Page size="LETTER" style={styles.page}>
@@ -42,8 +43,10 @@ function ChecklistPdfDocument(props: ChecklistPdfProps) {
         <View style={styles.headerGrid}>
           <View style={styles.headerField}><Text style={styles.headerLabel}>Worker&apos;s Name</Text><Text style={styles.headerValue}>{workerName}</Text></View>
           <View style={styles.headerField}><Text style={styles.headerLabel}>Company</Text><Text style={styles.headerValue}>{company}</Text></View>
+          <View style={styles.headerField}><Text style={styles.headerLabel}>Email</Text><Text style={styles.headerValue}>{email || "—"}</Text></View>
           <View style={styles.headerField}><Text style={styles.headerLabel}>Date</Text><Text style={styles.headerValue}>{new Date(submittedAt).toLocaleDateString()}</Text></View>
         </View>
+        {/* ...rest unchanged */}
 
         {sections.map((section) => (
           <View key={section.id} wrap={false}>
@@ -65,7 +68,7 @@ function ChecklistPdfDocument(props: ChecklistPdfProps) {
           {signatureDataUrl ? (
             // eslint-disable-next-line jsx-a11y/alt-text -- this is @react-pdf/renderer's Image, not an <img>
             <Image src={signatureDataUrl} style={styles.sigImage} />
-          ) : null}
+          ) : null}a
         </View>
       </Page>
     </Document>

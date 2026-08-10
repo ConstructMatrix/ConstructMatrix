@@ -38,6 +38,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     projectName: submission.projects?.name || "",
     workerName: submission.worker_name,
     company: submission.company,
+    email: submission.email,
     submittedAt: submission.submitted_at,
     sections: (sections || []) as ChecklistSectionConfig[],
     responses: submission.responses,
