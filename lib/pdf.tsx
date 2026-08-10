@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 16, marginBottom: 4, fontFamily: "Helvetica-Bold" },
   subtitle: { fontSize: 10, color: "#666", marginBottom: 16 },
   headerGrid: { flexDirection: "row", flexWrap: "wrap", marginBottom: 16, borderBottom: 1, borderColor: "#ddd", paddingBottom: 8 },
-  headerField: { width: "50%", marginBottom: 6 },
+  headerField: { width: "33%", marginBottom: 6 },
   headerLabel: { fontSize: 8, color: "#888", textTransform: "uppercase" },
   headerValue: { fontSize: 11 },
   sectionTitle: { fontSize: 12, fontFamily: "Helvetica-Bold", marginTop: 14, marginBottom: 6, backgroundColor: "#f5f5f5", padding: 6 },
@@ -25,8 +25,6 @@ export interface ChecklistPdfProps {
   projectName: string;
   workerName: string;
   company: string;
-  unionTrade: string | null;
-  employeeType: string | null;
   submittedAt: string;
   sections: ChecklistSectionConfig[];
   responses: Record<string, ChecklistResponseValue>;
@@ -34,7 +32,7 @@ export interface ChecklistPdfProps {
 }
 
 function ChecklistPdfDocument(props: ChecklistPdfProps) {
-  const { projectName, workerName, company, unionTrade, employeeType, submittedAt, sections, responses, signatureDataUrl } = props;
+  const { projectName, workerName, company, submittedAt, sections, responses, signatureDataUrl } = props;
   return (
     <Document>
       <Page size="LETTER" style={styles.page}>
@@ -44,8 +42,6 @@ function ChecklistPdfDocument(props: ChecklistPdfProps) {
         <View style={styles.headerGrid}>
           <View style={styles.headerField}><Text style={styles.headerLabel}>Worker&apos;s Name</Text><Text style={styles.headerValue}>{workerName}</Text></View>
           <View style={styles.headerField}><Text style={styles.headerLabel}>Company</Text><Text style={styles.headerValue}>{company}</Text></View>
-          <View style={styles.headerField}><Text style={styles.headerLabel}>Union / Trade</Text><Text style={styles.headerValue}>{unionTrade || "—"}</Text></View>
-          <View style={styles.headerField}><Text style={styles.headerLabel}>Worker Type</Text><Text style={styles.headerValue}>{employeeType || "—"}</Text></View>
           <View style={styles.headerField}><Text style={styles.headerLabel}>Date</Text><Text style={styles.headerValue}>{new Date(submittedAt).toLocaleDateString()}</Text></View>
         </View>
 

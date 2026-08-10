@@ -100,16 +100,14 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
   let pdfUrl: string | null = null;
   try {
     const pdfBuffer = await renderChecklistPdf({
-      projectName: project.name,
-      workerName,
-      company: companyName,
-      unionTrade: null,
-      employeeType: null,
-      submittedAt,
-      sections,
-      responses: input.responses,
-      signatureDataUrl: input.signatureDataUrl,
-    });
+    projectName: project.name,
+    workerName,
+    company: companyName,
+    submittedAt,
+    sections,
+    responses: input.responses,
+    signatureDataUrl: input.signatureDataUrl,
+  });
     const pdfPath = `${project.id}/${user.id}/checklists/${Date.now()}.pdf`;
     await supabase.storage.from("checklist-exports").upload(pdfPath, pdfBuffer, {
       contentType: "application/pdf",
