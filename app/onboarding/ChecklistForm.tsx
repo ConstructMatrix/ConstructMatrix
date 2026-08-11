@@ -186,7 +186,6 @@ export default function ChecklistForm({
               placeholder="you@example.com"
               className="input"
             />
-            <p className="text-xs text-text-muted mt-1">For notifications only — not verified.</p>
           </div>
 
           <Field label="Date" value={new Date().toLocaleDateString()} onChange={() => {}} readOnly />

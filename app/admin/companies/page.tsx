@@ -7,8 +7,18 @@ export default async function CompaniesPage() {
 
   const { data: companies } = await supabase
     .from("companies")
-    .select("id, name, address, phone, users(id)")
+    .select("id, name, address, phone")
     .order("name");
+
+  const { data: allLinks } = await supabase
+    .from("employee_companies")
+    .select("company_id, user_id");
+
+  const workerCounts = new Map<string, Set<string>>();
+  (allLinks || []).forEach((l) => {
+    if (!workerCounts.has(l.company_id)) workerCounts.set(l.company_id, new Set());
+    workerCounts.get(l.company_id)!.add(l.user_id);
+  });
 
   return (
     <div className="p-6">
@@ -29,7 +39,7 @@ export default async function CompaniesPage() {
         {(companies || []).length === 0 && (
           <div className="empty-state">No companies yet. Add your first one.</div>
         )}
-        {(companies || []).map((c: any) => (
+        {(companies || []).map((c) => (
           <Link
             key={c.id}
             href={`/admin/companies/${c.id}`}
@@ -39,7 +49,7 @@ export default async function CompaniesPage() {
             <div className="text-sm font-semibold">{c.name}</div>
             <div className="text-sm text-text-muted">{c.address || "—"}</div>
             <div className="text-sm text-text-muted">{c.phone || "—"}</div>
-            <div className="text-sm text-text-muted">{c.users?.length || 0}</div>
+            <div className="text-sm text-text-muted">{workerCounts.get(c.id)?.size || 0}</div>
           </Link>
         ))}
       </div>
