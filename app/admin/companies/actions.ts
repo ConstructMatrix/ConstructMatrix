@@ -9,7 +9,7 @@ export async function createCompany(formData: FormData) {
   const name = formData.get("name") as string;
   const address = formData.get("address") as string;
   const phone = formData.get("phone") as string;
-  const tradesRaw = formData.get("trades") as string;
+  const trades = formData.getAll("trades") as string[];
 
   let companyId: string;
 
@@ -26,11 +26,6 @@ export async function createCompany(formData: FormData) {
 
     companyId = company!.id;
 
-    const trades = (tradesRaw || "")
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
-
     if (trades.length > 0) {
       const { error: tradesError } = await supabase
         .from("company_trades")
@@ -41,7 +36,7 @@ export async function createCompany(formData: FormData) {
       }
     }
   } catch (err: any) {
-    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err; // let redirect() pass through
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
     redirect(`/admin/companies/new?error=${encodeURIComponent(err?.message || "Unknown error")}`);
   }
 

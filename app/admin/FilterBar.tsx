@@ -4,8 +4,10 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 export default function FilterBar({
   projects,
+  companies,
 }: {
   projects: { id: string; name: string }[];
+  companies: { id: string; name: string }[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -48,9 +50,17 @@ export default function FilterBar({
       >
         <option value="all">All projects</option>
         {projects.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.name}
-          </option>
+          <option key={p.id} value={p.id}>{p.name}</option>
+        ))}
+      </select>
+      <select
+        className="select"
+        defaultValue={searchParams.get("company") || "all"}
+        onChange={(e) => update("company", e.target.value)}
+      >
+        <option value="all">All companies</option>
+        {companies.map((c) => (
+          <option key={c.id} value={c.id}>{c.name}</option>
         ))}
       </select>
     </div>

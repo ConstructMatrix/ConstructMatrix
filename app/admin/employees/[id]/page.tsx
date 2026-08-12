@@ -4,7 +4,7 @@ import { computeClearance } from "@/lib/validation";
 import { signedUrl } from "@/lib/storage";
 import StatusPill from "@/components/StatusPill";
 import DocumentReviewCard from "./DocumentReviewCard";
-import { assignTradeAndRole } from "./actions";
+import { assignTradeAndRole } from "../actions";
 
 function displayName(u: { first_name?: string | null; last_name?: string | null; full_name?: string | null; email?: string | null }) {
   const combined = [u.first_name, u.last_name].filter(Boolean).join(" ");
