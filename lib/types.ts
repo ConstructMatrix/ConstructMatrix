@@ -23,7 +23,6 @@ export interface Project {
   address: string | null;
   admin_id: string;
   slug: string;
-  onboarding_type: "internal" | "external";
   created_at: string;
 }
 

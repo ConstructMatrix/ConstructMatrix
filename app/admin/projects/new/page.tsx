@@ -19,26 +19,6 @@ export default function NewProjectPage({ searchParams }: { searchParams: { error
         <LabeledInput name="address" label="Site address" placeholder="100 King St W, Toronto, ON" />
         <LabeledInput name="description" label="Description" placeholder="High-rise commercial build, phase 2" />
 
-        <div>
-          <div className="label">Onboarding type</div>
-          <div className="grid grid-cols-2 gap-3">
-            <label className="flex flex-col gap-1 border border-border rounded-lg p-4 cursor-pointer has-[:checked]:border-brand has-[:checked]:bg-brand-light transition-colors">
-              <div className="flex items-center gap-2">
-                <input type="radio" name="onboarding_type" value="external" defaultChecked />
-                <span className="text-sm font-semibold">External</span>
-              </div>
-              <span className="text-xs text-text-muted ml-6">Contractors & subcontractors</span>
-            </label>
-            <label className="flex flex-col gap-1 border border-border rounded-lg p-4 cursor-pointer has-[:checked]:border-brand has-[:checked]:bg-brand-light transition-colors">
-              <div className="flex items-center gap-2">
-                <input type="radio" name="onboarding_type" value="internal" />
-                <span className="text-sm font-semibold">Internal</span>
-              </div>
-              <span className="text-xs text-text-muted ml-6">Company employees</span>
-            </label>
-          </div>
-        </div>
-
         <label className="flex items-center gap-2.5 text-sm cursor-pointer">
           <input type="checkbox" name="useDefaults" defaultChecked className="rounded" />
           Start from the default checklist and document template
