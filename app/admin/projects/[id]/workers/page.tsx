@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import PageHeader from "@/components/PageHeader";
 import ProjectTabs from "../../../ProjectTabs";
-import { addWorker } from "./actions";
 
 function displayName(u: { first_name?: string | null; last_name?: string | null; full_name?: string | null; email?: string | null }) {
   const combined = [u?.first_name, u?.last_name].filter(Boolean).join(" ");
@@ -28,31 +27,6 @@ export default async function WorkersPage({ params }: { params: { id: string } }
       />
       <ProjectTabs projectId={project.id} active="workers" />
 
-      <div className="card mb-5 overflow-hidden">
-        <div className="card-header">Add worker</div>
-        <form action={addWorker.bind(null, project.id)} className="p-5 flex flex-wrap gap-4 items-end">
-          <div className="flex flex-col gap-1.5 flex-1 min-w-[160px]">
-            <label className="label">Full name</label>
-            <input name="full_name" required placeholder="Marcus Johnson" className="input" />
-          </div>
-          <div className="flex flex-col gap-1.5 flex-1 min-w-[180px]">
-            <label className="label">Email</label>
-            <input name="email" type="email" required placeholder="name@company.com" className="input" />
-          </div>
-          <div className="flex flex-col gap-1.5 min-w-[140px]">
-            <label className="label">Worker type</label>
-            <select name="employee_type" className="select w-full">
-              <option value="contractor">Contractor</option>
-              <option value="subcontractor">Subcontractor</option>
-              <option value="consultant">Consultant</option>
-              <option value="owner">Owner</option>
-              <option value="employee">Employee</option>
-            </select>
-          </div>
-          <button className="btn btn-primary">Add and invite</button>
-        </form>
-      </div>
-
       <div className="card overflow-hidden">
         <div className="cm-table-header">
           <span>Worker</span>
@@ -61,7 +35,7 @@ export default async function WorkersPage({ params }: { params: { id: string } }
           <span>Invited</span>
         </div>
         {(members || []).length === 0 && (
-          <div className="empty-state">No workers added yet. Use the form above to invite your first worker.</div>
+          <div className="empty-state">No workers yet. Share the site's QR code to get started.</div>
         )}
         {(members || []).map((m: any) => (
           <div key={m.user_id} className="cm-table-row">
