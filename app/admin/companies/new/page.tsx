@@ -49,7 +49,7 @@ export default function NewCompanyPage({
             ))}
           </div>
           <p className="text-xs text-text-muted mt-1">
-            Workers from this company will pick one of these during onboarding.
+            Select two or more trades this company offers. 
           </p>
         </div>
         <div className="flex justify-end">

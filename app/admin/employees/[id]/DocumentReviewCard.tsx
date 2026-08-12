@@ -8,7 +8,6 @@ export default function DocumentReviewCard({ doc, photoUrl }: { doc: EmployeeDoc
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [fields, setFields] = useState({
-    credential_type: doc.ai_data?.credential_type || "",
     holder_name: doc.ai_data?.holder_name || "",
     issuing_body: doc.ai_data?.issuing_body || "",
     issue_date: doc.ai_data?.issue_date || "",
@@ -49,9 +48,14 @@ export default function DocumentReviewCard({ doc, photoUrl }: { doc: EmployeeDoc
           Review and confirm
         </div>
 
+        <div className="mb-4">
+          <label className="label">Document type</label>
+          <div className="input text-sm bg-surface-1 text-text-primary font-medium">{doc.document_type}</div>
+        </div>
+
         {editing ? (
           <div className="space-y-3 text-sm">
-            {(["credential_type", "holder_name", "issuing_body", "issue_date", "expiry_date"] as const).map((key) => (
+            {(["holder_name", "issuing_body", "issue_date", "expiry_date"] as const).map((key) => (
               <div key={key}>
                 <label className="label capitalize">{key.replace("_", " ")}</label>
                 <input
@@ -64,7 +68,6 @@ export default function DocumentReviewCard({ doc, photoUrl }: { doc: EmployeeDoc
           </div>
         ) : (
           <div className="text-sm">
-            <Row label="Type" value={fields.credential_type} />
             <Row label="Name" value={fields.holder_name} />
             <Row label="Issued by" value={fields.issuing_body} />
             <Row label="Expiry" value={fields.expiry_date} last />
