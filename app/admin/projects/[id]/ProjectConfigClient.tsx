@@ -13,6 +13,14 @@ import {
   updateChecklistItem,
 } from "../actions";
 
+const RESPONSE_TYPES = [
+  { value: "yes_no_na", label: "Yes / No / N/A" },
+  { value: "pass_fail", label: "Pass / Fail" },
+  { value: "signature", label: "Signature" },
+  { value: "textbox", label: "Text box" },
+  { value: "number", label: "Number" },
+];
+
 export default function ProjectConfigClient({
   project,
   docConfigs,
@@ -78,6 +86,15 @@ export default function ProjectConfigClient({
                       required
                       className="input flex-1 min-w-[160px] text-sm"
                     />
+                    <select
+                      name="response_type"
+                      className="select text-xs"
+                      defaultValue={item.response_type || "yes_no_na"}
+                    >
+                      {RESPONSE_TYPES.map((rt) => (
+                        <option key={rt.value} value={rt.value}>{rt.label}</option>
+                      ))}
+                    </select>
                     <label className="text-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
                       <input type="checkbox" name="required" defaultChecked={item.required} className="rounded" /> Required
                     </label>
@@ -95,6 +112,9 @@ export default function ProjectConfigClient({
                     <span>
                       <span className="text-text-muted mr-2 font-medium">{i + 1}.</span>
                       {item.text}{" "}
+                      <span className="text-text-accent text-xs">
+                        · {RESPONSE_TYPES.find((rt) => rt.value === (item.response_type || "yes_no_na"))?.label}
+                      </span>{" "}
                       {item.required && <span className="text-text-danger text-xs font-medium">(required)</span>}
                     </span>
                     <div className="flex items-center gap-3 flex-shrink-0">
@@ -114,6 +134,11 @@ export default function ProjectConfigClient({
             </div>
             <form action={addChecklistItem.bind(null, s.id, project.id)} className="flex flex-wrap gap-2 items-center">
               <input name="text" placeholder="New item text" required className="input flex-1 min-w-[160px] text-sm" />
+              <select name="response_type" className="select text-xs" defaultValue="yes_no_na">
+                {RESPONSE_TYPES.map((rt) => (
+                  <option key={rt.value} value={rt.value}>{rt.label}</option>
+                ))}
+              </select>
               <label className="text-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
                 <input type="checkbox" name="required" className="rounded" /> Required
               </label>

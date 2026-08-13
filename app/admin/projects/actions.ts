@@ -130,6 +130,7 @@ export async function addChecklistItem(sectionId: string, projectId: string, for
   const supabase = createClient();
   const text = String(formData.get("text") || "").trim();
   const required = formData.get("required") === "on";
+  const response_type = String(formData.get("response_type") || "yes_no_na");
   if (!text) return;
 
   const { data: section } = await supabase
@@ -137,7 +138,7 @@ export async function addChecklistItem(sectionId: string, projectId: string, for
     .select("items")
     .eq("id", sectionId)
     .single();
-  const items = [...(section?.items || []), { text, required }];
+  const items = [...(section?.items || []), { text, required, response_type }];
   await supabase.from("project_checklist_config").update({ items }).eq("id", sectionId);
   redirect(`/admin/projects/${projectId}`);
 }
@@ -171,6 +172,7 @@ export async function updateChecklistItem(
   const supabase = createClient();
   const text = String(formData.get("text") || "").trim();
   const required = formData.get("required") === "on";
+  const response_type = String(formData.get("response_type") || "yes_no_na");
   if (!text) return;
 
   const { data: section } = await supabase
@@ -180,7 +182,7 @@ export async function updateChecklistItem(
     .single();
 
   const items = [...(section?.items || [])];
-  items[itemIndex] = { text, required };
+  items[itemIndex] = { text, required, response_type };
 
   await supabase.from("project_checklist_config").update({ items }).eq("id", sectionId);
   redirect(`/admin/projects/${projectId}`);

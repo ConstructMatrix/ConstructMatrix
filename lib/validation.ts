@@ -87,11 +87,22 @@ export function validateChecklistResponses(
       if (!item.required) return;
       const key = `${section.id}:${index}`;
       const value = responses[key];
-      if (value !== "yes" && value !== "na") {
+      const type = item.response_type || "yes_no_na";
+
+      let isAnswered = false;
+      if (type === "yes_no_na") {
+        isAnswered = value === "yes" || value === "na";
+      } else if (type === "pass_fail") {
+        isAnswered = value === "pass" || value === "fail";
+      } else {
+        isAnswered = typeof value === "string" && value.trim().length > 0;
+      }
+
+      if (!isAnswered) {
         errors.push({
           sectionId: section.id,
           itemIndex: index,
-          message: `"${item.text}" is required and must be answered Yes or N/A.`,
+          message: `"${item.text}" is required.`,
         });
       }
     });

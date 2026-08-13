@@ -4,6 +4,8 @@ export type EmployeeType = "employee" | "owner" | "contractor" | "subcontractor"
 
 export type ProjectStatus = "pending" | "in_progress" | "blocked" | "cleared";
 
+
+
 export interface AppUser {
   id: string;
   email: string;
@@ -42,10 +44,19 @@ export interface ProjectDocumentConfig {
   sort_order: number;
 }
 
+export type ResponseType = "yes_no_na" | "pass_fail" | "signature" | "textbox" | "number";
+
 export interface ChecklistItem {
   text: string;
   required: boolean;
+  response_type?: ResponseType; // defaults to "yes_no_na" if absent (existing items)
 }
+
+export type ChecklistResponseValue =
+  | "yes" | "no" | "na"
+  | "pass" | "fail"
+  | string  // textbox text, number as string, signature as data URL
+  | null;
 
 export interface ChecklistSectionConfig {
   id: string;
@@ -76,8 +87,6 @@ export interface EmployeeDocument {
   is_mandatory: boolean;
   created_at: string;
 }
-
-export type ChecklistResponseValue = "yes" | "no" | "na" | null;
 
 export interface ChecklistSubmission {
   id: string;

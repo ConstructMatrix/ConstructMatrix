@@ -35,7 +35,7 @@ export default async function WorkersPage({ params }: { params: { id: string } }
           <span>Invited</span>
         </div>
         {(members || []).length === 0 && (
-          <div className="empty-state">No workers yet. Share the site's QR code to get started.</div>
+          <div className="empty-state">No workers yet. Share the site&apos;s QR code to get started.</div>
         )}
         {(members || []).map((m: any) => (
           <div key={m.user_id} className="cm-table-row">
