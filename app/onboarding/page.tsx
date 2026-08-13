@@ -58,10 +58,6 @@ export default async function OnboardingPage({
     );
   }
 
-  await supabase
-    .from("project_members")
-    .upsert({ project_id: project.id, user_id: user!.id, status: "pending" }, { onConflict: "project_id,user_id", ignoreDuplicates: true });
-
   const { data: sections } = await supabase
     .from("project_checklist_config")
     .select("*")

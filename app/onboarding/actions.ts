@@ -40,16 +40,6 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
 
   const isStaffAccount = currentProfile?.role === "admin" || currentProfile?.role === "manager";
 
-  const profileUpdate: Record<string, any> = {};
-  if (!isStaffAccount) {
-    if (input.firstName) profileUpdate.first_name = input.firstName;
-    if (input.lastName) profileUpdate.last_name = input.lastName;
-    if (input.email) profileUpdate.email = input.email;
-  }
-  if (Object.keys(profileUpdate).length > 0) {
-    await supabase.from("users").update(profileUpdate).eq("id", user.id);
-  }
-
   if (!input.signatureDataUrl) return { ok: false, error: "A signature is required before submitting." };
   if (!input.companyId) return { ok: false, error: "Please select your company." };
   if (!input.email.trim()) return { ok: false, error: "Please enter your email." };
@@ -68,13 +58,6 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
     .single();
   if (!project) return { ok: false, error: "Project not found." };
 
-  if (!isStaffAccount) {
-    await supabase.from("employee_companies").upsert(
-      { user_id: user.id, company_id: input.companyId, project_id: project.id },
-      { onConflict: "user_id,company_id,project_id", ignoreDuplicates: true },
-    );
-  }
-
   const { data: sectionsData } = await supabase
     .from("project_checklist_config")
     .select("*")
@@ -85,6 +68,28 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
   const errors = validateChecklistResponses(sections, input.responses);
   if (errors.length > 0) {
     return { ok: false, validationErrors: errors.map((e) => e.message) };
+  }
+
+  const profileUpdate: Record<string, any> = {};
+  if (!isStaffAccount) {
+    if (input.firstName) profileUpdate.first_name = input.firstName;
+    if (input.lastName) profileUpdate.last_name = input.lastName;
+    if (input.email) profileUpdate.email = input.email;
+  }
+  if (Object.keys(profileUpdate).length > 0) {
+    await supabase.from("users").update(profileUpdate).eq("id", user.id);
+  }
+
+  if (!isStaffAccount) {
+    await supabase.from("project_members").upsert(
+      { project_id: project.id, user_id: user.id, status: "pending" },
+      { onConflict: "project_id,user_id", ignoreDuplicates: true },
+    );
+
+    await supabase.from("employee_companies").upsert(
+      { user_id: user.id, company_id: input.companyId, project_id: project.id },
+      { onConflict: "user_id,company_id,project_id", ignoreDuplicates: true },
+    );
   }
 
   const submittedAt = new Date().toISOString();
@@ -100,15 +105,15 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
   let pdfUrl: string | null = null;
   try {
     const pdfBuffer = await renderChecklistPdf({
-    projectName: project.name,
-    workerName,
-    company: companyName,
-    email: input.email,
-    submittedAt,
-    sections,
-    responses: input.responses,
-    signatureDataUrl: input.signatureDataUrl,
-});
+      projectName: project.name,
+      workerName,
+      company: companyName,
+      email: input.email,
+      submittedAt,
+      sections,
+      responses: input.responses,
+      signatureDataUrl: input.signatureDataUrl,
+    });
     const pdfPath = `${project.id}/${user.id}/checklists/${Date.now()}.pdf`;
     await supabase.storage.from("checklist-exports").upload(pdfPath, pdfBuffer, {
       contentType: "application/pdf",
