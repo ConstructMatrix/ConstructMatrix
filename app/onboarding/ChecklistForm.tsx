@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import type SignatureCanvas from "react-signature-canvas";
 import SignaturePad from "@/components/SignaturePad";
 import YesNoNA from "@/components/YesNoNA";
+import PassFail from "@/components/PassFail";
 import type { ChecklistResponseValue, ChecklistSectionConfig, ProjectDocumentConfig } from "@/lib/types";
 import { validateChecklistResponses } from "@/lib/validation";
 import { fileToImageDataUrl } from "@/lib/fileUpload";
@@ -44,6 +45,8 @@ export default function ChecklistForm({
   const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
   const [docErrors, setDocErrors] = useState<Record<string, string>>({});
   const docFileInputs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  const itemSigRefs = useRef<Record<string, SignatureCanvas | null>>({});
 
   function setResponse(sectionId: string, itemIndex: number, value: ChecklistResponseValue) {
     setResponses((prev) => ({ ...prev, [`${sectionId}:${itemIndex}`]: value }));
@@ -196,6 +199,9 @@ export default function ChecklistForm({
             <div className="card-header">{section.section_name}</div>
             {section.items.map((item, index) => {
               const key = `${section.id}:${index}`;
+              const responseType = item.response_type || "yes_no_na";
+              const value = responses[key] ?? null;
+
               return (
                 <div key={key} className="flex items-start gap-3 px-4 py-3.5 border-b border-border last:border-b-0">
                   <span className="text-text-muted text-sm font-medium min-w-[24px] pt-0.5">{index + 1}.</span>
@@ -205,7 +211,48 @@ export default function ChecklistForm({
                       <span className="text-text-danger text-xs font-semibold ml-1.5 uppercase tracking-wide">required</span>
                     )}
                   </span>
-                  <YesNoNA value={responses[key] ?? null} onChange={(v) => setResponse(section.id, index, v)} />
+
+                  {responseType === "yes_no_na" && (
+                    <YesNoNA value={value} onChange={(v) => setResponse(section.id, index, v)} />
+                  )}
+
+                  {responseType === "pass_fail" && (
+                    <PassFail value={value} onChange={(v) => setResponse(section.id, index, v)} />
+                  )}
+
+                  {responseType === "textbox" && (
+                    <input
+                      type="text"
+                      value={value || ""}
+                      onChange={(e) => setResponse(section.id, index, e.target.value)}
+                      placeholder="Type your answer..."
+                      className="input text-sm w-48 flex-shrink-0"
+                    />
+                  )}
+
+                  {responseType === "number" && (
+                    <input
+                      type="number"
+                      value={value || ""}
+                      onChange={(e) => setResponse(section.id, index, e.target.value)}
+                      placeholder="0"
+                      className="input text-sm w-24 flex-shrink-0"
+                    />
+                  )}
+
+                  {responseType === "signature" && (
+                    <div className="flex-shrink-0 w-48">
+                      <div className="border border-border rounded-md bg-surface-1 overflow-hidden" style={{ height: 60 }}>
+                        <SignaturePad
+                          ref={(el) => { itemSigRefs.current[key] = el; }}
+                          onEnd={() => {
+                            const sig = itemSigRefs.current[key];
+                            if (sig) setResponse(section.id, index, sig.getTrimmedCanvas().toDataURL("image/png"));
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}
