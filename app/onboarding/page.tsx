@@ -16,6 +16,14 @@ export default async function OnboardingPage({
   if (!user) {
     redirect(`/login?redirect=/onboarding${searchParams.project ? `?project=${searchParams.project}` : ""}`);
   }
+  // Safety net: guarantee a public.users row exists for this session,
+  // in case the auth.users trigger hasn't completed or fired.
+  await supabase
+    .from("users")
+    .upsert(
+      { id: user!.id, email: user!.email ?? null },
+      { onConflict: "id", ignoreDuplicates: true },
+    );
 
   const { data: profile } = await supabase.from("users").select("*").eq("id", user!.id).single();
 

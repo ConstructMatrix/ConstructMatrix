@@ -11,16 +11,22 @@ export default function SiteSignInForm({ projectSlug }: { projectSlug: string })
   useEffect(() => {
     async function signInAndRedirect() {
       const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (!session) {
-        const { error } = await supabase.auth.signInAnonymously();
-        if (error) {
-          console.error("Anonymous sign-in failed:", error);
-          setError(`[${error.status || "?"}] ${error.name}: ${error.message}`);
-          return;
-        }
+      const { data: { session }, error } = await supabase.auth.signInAnonymously();
+      if (error) {
+        console.error("Anonymous sign-in failed:", error.message, error);
+        setError(error.message || "Couldn't start your session. Please try again.");
+        return;
       }
+
+      if (session?.user) {
+        await supabase
+          .from("users")
+          .upsert(
+            { id: session.user.id, email: session.user.email ?? null },
+            { onConflict: "id", ignoreDuplicates: true },
+          );
+      }
+
       router.push(`/onboarding?project=${projectSlug}`);
     }
     signInAndRedirect();
