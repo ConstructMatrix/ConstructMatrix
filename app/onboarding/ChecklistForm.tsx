@@ -83,20 +83,20 @@ export default function ChecklistForm({
       });
 
       if (!res.ok) {
-        const text = await res.text();
-        console.error("Doc upload failed:", res.status, text);
-        setDocErrors((prev) => ({
-          ...prev,
-          [config.document_type]: res.status === 413 ? "File too large. Try again." : "Upload failed. Try again.",
-        }));
-        return;
-      }
+  const text = await res.text();
+  console.error("Doc upload failed:", res.status, text);
+  setDocErrors((prev) => ({
+    ...prev,
+    [config.document_type]: `Upload failed (${res.status}): ${text.slice(0, 150)}`,
+  }));
+  return;
+}
 
       setDocStatus((prev) => ({ ...prev, [config.document_type]: "yes" }));
-    } catch (err) {
-      console.error("Doc upload error:", err);
-      setDocErrors((prev) => ({ ...prev, [config.document_type]: "Upload failed. Check your connection." }));
-    } finally {
+    } catch (err: any) {
+  console.error("Doc upload error:", err);
+  setDocErrors((prev) => ({ ...prev, [config.document_type]: `Upload failed: ${err?.message || String(err)}` }));
+} finally {
       setUploadingDoc(null);
     }
   }
