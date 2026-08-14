@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { validateChecklistResponses, computeClearance } from "@/lib/validation";
 import { renderChecklistPdf } from "@/lib/pdf";
-import { sendChecklistSubmittedNotice } from "@/lib/email";
+import { sendChecklistSubmittedNotice, sendWorkerSubmissionConfirmation } from "@/lib/email";
 import type { ChecklistResponseValue, ChecklistSectionConfig } from "@/lib/types";
 
 export interface SubmitChecklistInput {
@@ -197,8 +197,22 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
         documentsSubmitted,
       });
     } catch (err) {
-      console.error("Failed to send notification email", err);
+      console.error("Failed to send admin notification email", err);
     }
   }
+
+  if (input.email) {
+    try {
+      await sendWorkerSubmissionConfirmation({
+        to: input.email,
+        workerName,
+        projectName: project.name,
+        documentsSubmitted,
+      });
+    } catch (err) {
+      console.error("Failed to send worker confirmation email", err);
+    }
+  }
+
   return { ok: true };
 }

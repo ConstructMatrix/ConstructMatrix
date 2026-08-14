@@ -90,3 +90,27 @@ export async function sendChecklistSubmittedNotice(params: {
     html: `<p>${params.workerName} just completed and signed their onboarding checklist for <strong>${params.projectName}</strong>.</p>${docsHtml}<p>Review it in the admin dashboard.</p>`,
   });
 }
+
+export async function sendWorkerSubmissionConfirmation(params: {
+  to: string;
+  workerName: string;
+  projectName: string;
+  documentsSubmitted: string[];
+}) {
+  const docsHtml = params.documentsSubmitted.length
+    ? `<ul>${params.documentsSubmitted.map((d) => `<li>${d}</li>`).join("")}</ul>`
+    : "<p>No documents were uploaded.</p>";
+
+  return resend().emails.send({
+    from: FROM,
+    to: params.to,
+    subject: `Your onboarding checklist was submitted — ${params.projectName}`,
+    html: `
+      <p>Hi ${params.workerName},</p>
+      <p>Thanks for completing your onboarding checklist for <strong>${params.projectName}</strong>. Here's what you submitted:</p>
+      ${docsHtml}
+      <p>Your supervisor will review and verify your documents soon. You'll receive another email once they're confirmed.</p>
+      <p>— Construct Matrix</p>
+    `,
+  });
+}
