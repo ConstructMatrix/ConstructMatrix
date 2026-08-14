@@ -77,7 +77,13 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
     if (input.email) profileUpdate.email = input.email;
   }
   if (Object.keys(profileUpdate).length > 0) {
-    await supabase.from("users").update(profileUpdate).eq("id", user.id);
+    const { error: profileError } = await supabase
+      .from("users")
+      .update(profileUpdate)
+      .eq("id", user.id);
+    if (profileError) {
+      console.error("Failed to update user profile:", profileError);
+    }
   }
 
   if (!isStaffAccount) {
@@ -129,6 +135,7 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
     project_id: project.id,
     worker_name: workerName,
     company: companyName,
+    email: input.email,
     union_trade: null,
     submitted_at: submittedAt,
     responses: input.responses,
