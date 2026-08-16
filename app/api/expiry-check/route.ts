@@ -3,7 +3,7 @@ import { createServiceRoleClient } from "@/lib/supabase/server";
 import { computeClearance } from "@/lib/validation";
 import { sendExpiryAlert, sendAdminExpiryAlert } from "@/lib/email";
 
-const THRESHOLDS = [90, 30, 7];
+const THRESHOLDS = [90, 30, 7, 0];
 
 function daysUntil(dateStr: string) {
   const ms = new Date(dateStr).getTime() - new Date(new Date().toDateString()).getTime();

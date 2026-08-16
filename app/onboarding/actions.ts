@@ -195,6 +195,8 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
     if (m.users?.email) emailsToNotify.add(m.users.email);
   });
 
+  console.log("Admins to notify:", Array.from(emailsToNotify));
+
   for (const email of emailsToNotify) {
     try {
       await sendChecklistSubmittedNotice({
@@ -203,8 +205,9 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
         projectName: project.name,
         documentsSubmitted,
       });
+      console.log(`Admin email sent successfully to: ${email}`);
     } catch (err) {
-      console.error("Failed to send admin notification email", err);
+      console.error(`Failed to send admin notification email to ${email}:`, err);
     }
   }
 
