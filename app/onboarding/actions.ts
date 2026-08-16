@@ -195,8 +195,7 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
     if (m.users?.email) emailsToNotify.add(m.users.email);
   });
 
-  console.log("Admins to notify:", Array.from(emailsToNotify));
-
+  const sendResults: string[] = [];
   for (const email of emailsToNotify) {
     try {
       await sendChecklistSubmittedNotice({
@@ -205,9 +204,9 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
         projectName: project.name,
         documentsSubmitted,
       });
-      console.log(`Admin email sent successfully to: ${email}`);
-    } catch (err) {
-      console.error(`Failed to send admin notification email to ${email}:`, err);
+      sendResults.push(`${email}: OK`);
+    } catch (err: any) {
+      sendResults.push(`${email}: FAILED - ${err?.message || String(err)}`);
     }
   }
 
@@ -224,5 +223,7 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
     }
   }
 
-  return { ok: true };
+  const debugMsg = `DEBUG: admins=[${Array.from(emailsToNotify).join(",") || "none"}] results=[${sendResults.join(" | ") || "none"}]`;
+
+  return { ok: true, error: debugMsg };
 }
