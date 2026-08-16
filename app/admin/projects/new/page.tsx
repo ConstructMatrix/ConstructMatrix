@@ -1,7 +1,14 @@
+import { createClient } from "@/lib/supabase/server";
 import { createProject } from "../actions";
 import PageHeader from "@/components/PageHeader";
 
-export default function NewProjectPage({ searchParams }: { searchParams: { error?: string } }) {
+export default async function NewProjectPage({ searchParams }: { searchParams: { error?: string } }) {
+  const supabase = createClient();
+  const { data: templates } = await supabase
+    .from("checklist_templates")
+    .select("id, name")
+    .order("created_at", { ascending: false });
+
   return (
     <div className="p-6 max-w-lg mx-auto">
       <PageHeader
@@ -19,10 +26,17 @@ export default function NewProjectPage({ searchParams }: { searchParams: { error
         <LabeledInput name="address" label="Site address" placeholder="100 King St W, Toronto, ON" />
         <LabeledInput name="description" label="Description" placeholder="High-rise commercial build, phase 2" />
 
-        <label className="flex items-center gap-2.5 text-sm cursor-pointer">
-          <input type="checkbox" name="useDefaults" defaultChecked className="rounded" />
-          Start from the default checklist and document template
-        </label>
+        <div>
+          <label className="label">Starting checklist</label>
+          <select name="template" className="select w-full" defaultValue="default">
+            <option value="default">Default checklist</option>
+            {(templates || []).map((t) => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+            <option value="none">Start blank</option>
+          </select>
+        </div>
+
         <button type="submit" className="btn btn-primary w-full py-2.5 mt-1">
           Create project
         </button>

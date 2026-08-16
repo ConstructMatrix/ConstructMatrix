@@ -60,7 +60,7 @@ export async function createProject(formData: FormData) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
-  const useDefaults = formData.get("useDefaults") === "on";
+  const templateChoice = String(formData.get("template") || "default");
 
   const { data: project, error } = await supabase
     .from("projects")
@@ -72,16 +72,74 @@ export async function createProject(formData: FormData) {
     redirect(`/admin/projects/new?error=${encodeURIComponent(error?.message || "Could not create project")}`);
   }
 
-  if (useDefaults) {
+  if (templateChoice === "default") {
     await supabase.from("project_documents_config").insert(
       DEFAULT_DOCS.map((d) => ({ ...d, project_id: project.id })),
     );
     await supabase.from("project_checklist_config").insert(
       DEFAULT_SECTIONS.map((s) => ({ ...s, project_id: project.id })),
     );
+  } else if (templateChoice !== "none") {
+    const { data: template } = await supabase
+      .from("checklist_templates")
+      .select("*")
+      .eq("id", templateChoice)
+      .single();
+    if (template) {
+      if ((template.documents || []).length > 0) {
+        await supabase.from("project_documents_config").insert(
+          template.documents.map((d: any) => ({
+            document_type: d.document_type,
+            is_mandatory: d.is_mandatory,
+            sort_order: d.sort_order,
+            project_id: project.id,
+          })),
+        );
+      }
+      if ((template.sections || []).length > 0) {
+        await supabase.from("project_checklist_config").insert(
+          template.sections.map((s: any) => ({
+            section_name: s.section_name,
+            section_order: s.section_order,
+            items: s.items,
+            project_id: project.id,
+          })),
+        );
+      }
+    }
   }
 
   redirect(`/admin/projects/${project.id}/workers`);
+}
+
+export async function saveAsTemplate(projectId: string, formData: FormData) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const name = String(formData.get("template_name") || "").trim();
+  if (!name) return;
+
+  const { data: sections } = await supabase
+    .from("project_checklist_config")
+    .select("section_name, section_order, items")
+    .eq("project_id", projectId)
+    .order("section_order");
+  const { data: docs } = await supabase
+    .from("project_documents_config")
+    .select("document_type, is_mandatory, sort_order")
+    .eq("project_id", projectId)
+    .order("sort_order");
+
+  await supabase.from("checklist_templates").insert({
+    name,
+    sections: sections || [],
+    documents: docs || [],
+    created_by: user?.id,
+  });
+
+  redirect(`/admin/projects/${projectId}`);
 }
 
 export async function addDocumentConfig(projectId: string, formData: FormData) {

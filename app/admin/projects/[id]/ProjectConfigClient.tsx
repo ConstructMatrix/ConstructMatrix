@@ -11,6 +11,7 @@ import {
   removeChecklistItem,
   removeChecklistSection,
   updateChecklistItem,
+  saveAsTemplate,
 } from "../actions";
 
 const RESPONSE_TYPES = [
@@ -60,7 +61,7 @@ export default function ProjectConfigClient({
         </form>
       </div>
 
-      <div className="card overflow-hidden">
+      <div className="card overflow-hidden mb-5">
         <div className="card-header">Checklist sections</div>
         {(sections || []).map((s: ChecklistSectionConfig) => (
           <div key={s.id} className="px-5 py-4 border-b border-border last:border-b-0">
@@ -150,12 +151,28 @@ export default function ProjectConfigClient({
           <input name="section_name" placeholder="New section name" required className="input flex-1 min-w-[160px] text-sm" />
           <button className="btn text-sm">+ Add section</button>
         </form>
+      </div>
 
-        <div className="flex justify-end p-5 border-t border-border">
-          <Link href="/admin/projects" className="btn btn-primary">
-            Done — back to projects
-          </Link>
-        </div>
+      <div className="card p-5 mb-5">
+        <div className="text-sm font-semibold mb-1">Save as reusable template</div>
+        <p className="text-xs text-text-muted mb-3">
+          Save this project's current checklist and required documents so it can be reused when creating new projects.
+        </p>
+        <form action={saveAsTemplate.bind(null, project.id)} className="flex flex-wrap gap-3">
+          <input
+            name="template_name"
+            placeholder="Template name (e.g. Standard External Onboarding)"
+            required
+            className="input flex-1 min-w-[220px] text-sm"
+          />
+          <button className="btn btn-primary text-sm">Save as template</button>
+        </form>
+      </div>
+
+      <div className="flex justify-end p-5">
+        <Link href="/admin/projects" className="btn btn-primary">
+          Done — back to projects
+        </Link>
       </div>
     </>
   );
