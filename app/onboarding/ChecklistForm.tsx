@@ -101,7 +101,7 @@ export default function ChecklistForm({
     }
   }
 
-  async function handleSubmit() {
+async function handleSubmit() {
     const clientErrors = validateChecklistResponses(sections, responses).map((e) => e.message);
     if (!companyId) clientErrors.push("Please select your company.");
     if (!email.trim()) clientErrors.push("Please enter your email.");
@@ -139,6 +139,7 @@ export default function ChecklistForm({
       setErrors(result.validationErrors || [result.error || "Something went wrong."]);
       return;
     }
+    if (result.error) alert(result.error);
     setSubmitted(true);
   }
 
