@@ -156,7 +156,7 @@ export default function ProjectConfigClient({
       <div className="card p-5 mb-5">
         <div className="text-sm font-semibold mb-1">Save as reusable template</div>
         <p className="text-xs text-text-muted mb-3">
-          Save this project's current checklist and required documents so it can be reused when creating new projects.
+          Save this as default checklist. 
         </p>
         <form action={saveAsTemplate.bind(null, project.id)} className="flex flex-wrap gap-3">
           <input
