@@ -26,7 +26,17 @@ export default async function CompanyDetailPage({ params }: { params: { id: stri
 
   return (
     <div className="p-6">
-      <PageHeader title={company.name} subtitle={company.address || undefined} />
+      <div className="flex items-center justify-between mb-2 flex-wrap gap-3">
+        <PageHeader title={company.name} subtitle={company.address || undefined} />
+        <div className="flex gap-2">
+          <a href={`/api/companies/${company.id}/export?format=csv`} className="btn text-sm">
+            Export Excel
+          </a>
+          <a href={`/api/companies/${company.id}/export?format=pdf`} className="btn text-sm">
+            Export PDF
+          </a>
+        </div>
+      </div>
 
       <div className="card p-5 mb-5">
         <div className="text-sm font-semibold mb-2">Trades offered</div>

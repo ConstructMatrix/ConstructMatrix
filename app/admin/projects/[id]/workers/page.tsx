@@ -21,10 +21,20 @@ export default async function WorkersPage({ params }: { params: { id: string } }
 
   return (
     <div className="p-6">
-      <PageHeader
-        title={`${project.name} — Roster`}
-        subtitle={project.description || project.address || undefined}
-      />
+      <div className="flex items-center justify-between mb-2 flex-wrap gap-3">
+        <PageHeader
+          title={`${project.name} — Roster`}
+          subtitle={project.description || project.address || undefined}
+        />
+        <div className="flex gap-2">
+          <a href={`/api/projects/${project.id}/export?format=csv`} className="btn text-sm">
+            Export Excel
+          </a>
+          <a href={`/api/projects/${project.id}/export?format=pdf`} className="btn text-sm">
+            Export PDF
+          </a>
+        </div>
+      </div>
       <ProjectTabs projectId={project.id} active="workers" />
 
       <div className="card overflow-hidden">
