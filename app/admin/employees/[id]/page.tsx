@@ -4,6 +4,7 @@ import { computeClearance } from "@/lib/validation";
 import { signedUrl } from "@/lib/storage";
 import StatusPill from "@/components/StatusPill";
 import DocumentReviewCard from "./DocumentReviewCard";
+import AdminDocumentReplace from "@/components/AdminDocumentReplace";
 import { assignTradeAndRole } from "../actions";
 
 function displayName(u: { first_name?: string | null; last_name?: string | null; full_name?: string | null; email?: string | null }) {
@@ -62,13 +63,19 @@ export default async function EmployeeDetailPage({
     if (!latestByType.has(doc.document_type)) latestByType.set(doc.document_type, doc);
   }
 
-  const pendingDocs = (employeeDocs || []).filter((d) => !d.confirmed_at);
-  const pendingDocsWithUrls = await Promise.all(
-    pendingDocs.map(async (doc) => ({
+  const allDocsWithUrls = await Promise.all(
+    (employeeDocs || []).map(async (doc) => ({
       doc,
       photoUrl: await signedUrl(supabase, "credential-photos", doc.photo_url),
     })),
   );
+  const urlByDocId = new Map(allDocsWithUrls.map((d) => [d.doc.id, d.photoUrl]));
+
+  const pendingDocs = (employeeDocs || []).filter((d) => !d.confirmed_at);
+  const pendingDocsWithUrls = pendingDocs.map((doc) => ({
+    doc,
+    photoUrl: urlByDocId.get(doc.id) || null,
+  }));
 
   const submissionDownloads = await Promise.all(
     (submissions || []).map(async (s) => ({
@@ -160,6 +167,7 @@ export default async function EmployeeDetailPage({
             {(docConfigs || []).map((config) => {
               const doc = latestByType.get(config.document_type);
               const status = !doc ? "missing" : doc.confirmed_at ? "verified" : "pending";
+              const photoUrl = doc ? urlByDocId.get(doc.id) : null;
               return (
                 <div key={config.id} className="flex items-center gap-3 px-5 py-3.5 border-b border-border last:border-b-0">
                   <div
@@ -183,6 +191,17 @@ export default async function EmployeeDetailPage({
                           : "Waiting for review"}
                     </div>
                   </div>
+                  {photoUrl && (
+                    <a href={photoUrl} target="_blank" rel="noreferrer" className="btn text-xs py-1 px-2 flex-shrink-0">
+                      View
+                    </a>
+                  )}
+                  <AdminDocumentReplace
+                    projectId={project.id}
+                    userId={employee.id}
+                    documentType={config.document_type}
+                    isMandatory={config.is_mandatory}
+                  />
                   <span className={`pill ${status === "verified" ? "pill-ok" : status === "pending" ? "pill-warn" : ""}`}>
                     {status === "verified" ? "Verified" : status === "pending" ? "Pending" : "Missing"}
                   </span>
