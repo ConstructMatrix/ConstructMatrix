@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 import { validateChecklistResponses, computeClearance } from "@/lib/validation";
 import { renderChecklistPdf } from "@/lib/pdf";
 import { sendChecklistSubmittedNotice, sendWorkerSubmissionConfirmation } from "@/lib/email";
@@ -176,13 +176,15 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
 
   const documentsSubmitted = (employeeDocs || []).map((d) => d.document_type);
 
-  const { data: managers } = await supabase
+  const adminClient = createServiceRoleClient();
+
+  const { data: managers } = await adminClient
     .from("project_members")
     .select("users(email, role)")
     .eq("project_id", project.id)
     .in("users.role", ["admin", "manager"]);
 
-  const { data: allAdmins } = await supabase
+  const { data: allAdmins } = await adminClient
     .from("users")
     .select("email")
     .eq("role", "admin");
@@ -223,7 +225,5 @@ export async function submitChecklist(input: SubmitChecklistInput): Promise<Subm
     }
   }
 
-  const debugMsg = `DEBUG: admins=[${Array.from(emailsToNotify).join(",") || "none"}] results=[${sendResults.join(" | ") || "none"}]`;
-
-  return { ok: true, error: debugMsg };
+  return { ok: true };
 }

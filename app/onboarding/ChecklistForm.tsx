@@ -134,12 +134,11 @@ async function handleSubmit() {
       signatureDataUrl,
     });
 
-    setSubmitting(false);
+      setSubmitting(false);
     if (!result.ok) {
       setErrors(result.validationErrors || [result.error || "Something went wrong."]);
       return;
     }
-    if (result.error) alert(result.error);
     setSubmitted(true);
   }
 
